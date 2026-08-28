@@ -1,0 +1,45 @@
+{
+  "value": [
+    {
+      "id": "outlook-event-1",
+      "subject": "Mentor call",
+      "isAllDay": false,
+      "isCancelled": false,
+      "start": {"dateTime": "2026-08-25T20:00:00", "timeZone": "UTC"},
+      "end": {"dateTime": "2026-08-25T20:45:00", "timeZone": "UTC"},
+      "bodyPreview": "Talk through the next milestone.",
+      "location": {"displayName": "Remote"},
+      "organizer": {"emailAddress": {"name": "Mentor", "address": "mentor@outlook.example"}},
+      "onlineMeeting": {"joinUrl": "https://teams.microsoft.com/l/meetup-join/demo"},
+      "webLink": "https://outlook.live.com/calendar/item/outlook-event-1",
+      "showAs": "busy",
+      "lastModifiedDateTime": "2026-08-25T18:00:00Z",
+      "type": "occurrence",
+      "seriesMasterId": "mentor-series"
+    },
+    {
+      "id": "outlook-all-day",
+      "subject": "Birthday",
+      "isAllDay": true,
+      "isCancelled": false,
+      "start": {"dateTime": "2026-08-25T00:00:00", "timeZone": "UTC"},
+      "end": {"dateTime": "2026-08-26T00:00:00", "timeZone": "UTC"},
+      "bodyPreview": "",
+      "location": {"displayName": ""},
+      "organizer": {"emailAddress": {"name": "", "address": ""}},
+      "webLink": "https://outlook.live.com/calendar/item/outlook-all-day",
+      "showAs": "free",
+      "lastModifiedDateTime": "2026-08-20T12:00:00Z",
+      "type": "singleInstance"
+    },
+    {
+      "id": "outlook-cancelled",
+      "subject": "Cancelled",
+      "isAllDay": false,
+      "isCancelled": true,
+      "start": {"dateTime": "2026-08-25T21:00:00", "timeZone": "UTC"},
+      "end": {"dateTime": "2026-08-25T22:00:00", "timeZone": "UTC"}
+    }
+  ],
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendars/calendar-primary/calendarView?$skiptoken=event-page-2"
+}

@@ -1,0 +1,30 @@
+{
+  "surfaces": [
+    {"id": "calendar", "label": "Flight Deck Calendar"},
+    {"id": "desktop", "label": "Omarchy desktop"}
+  ],
+  "workflows": [
+    {"id": "calendar-control", "label": "Calendar control"}
+  ],
+  "shortcuts": [
+    {"surface": "calendar", "keys": "t", "action": "Today", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "w", "action": "Week", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "j / k or Down / Up", "action": "Move down or up through events, including the all-day lane", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "h / l or Left / Right", "action": "Move across overlapping Week cards, then to the adjacent day", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "[ / ]", "action": "Previous or next period", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "g", "action": "Go to Now, select the current or nearest event, and reveal it", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "Enter", "action": "Toggle details or activate", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "m", "action": "Open meeting", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "o", "action": "Open provider source", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "c", "action": "Open calendar accounts and visibility", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "s", "action": "Open appearance settings", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "h / l (Settings)", "action": "Previous or next settings section", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "j / k (Settings)", "action": "Next or previous settings control", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "Enter / Space (Settings)", "action": "Change or activate the focused setting", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "a (Settings)", "action": "Apply settings", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "r", "action": "Refresh", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "?", "action": "Toggle help", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "calendar", "keys": "Esc", "action": "Cancel or close", "status": "custom", "workflows": ["calendar-control"]},
+    {"surface": "desktop", "keys": "Super+Shift+C", "action": "Flight Deck calendar", "live_description": "Flight Deck calendar", "status": "custom", "workflows": ["calendar-control"]}
+  ]
+}

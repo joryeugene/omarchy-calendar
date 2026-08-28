@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.joryeugene.omarchy-calendar",
+  "name": "Flight Deck Calendar",
+  "version": "1.0.0-rc.3",
+  "author": "Jory Eugene",
+  "description": "Read-only Google and Outlook calendar with Focus Today and Time Grid Week views",
+  "kinds": [
+    "bar-widget",
+    "service"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "service": "Service.qml"
+  },
+  "barWidget": {
+    "displayName": "Flight Deck Calendar",
+    "description": "Keyboard-first calendar and full date-time label",
+    "category": "Time",
+    "allowMultiple": false
+  }
+}

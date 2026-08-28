@@ -1,0 +1,36 @@
+{
+  "items": [
+    {
+      "id": "event-1",
+      "status": "confirmed",
+      "summary": "Design review",
+      "description": "<b>Review</b> the selected direction.",
+      "location": "Remote",
+      "start": {"dateTime": "2026-08-25T15:00:00-05:00", "timeZone": "America/Chicago"},
+      "end": {"dateTime": "2026-08-25T15:45:00-05:00", "timeZone": "America/Chicago"},
+      "organizer": {"email": "organizer@example.com"},
+      "hangoutLink": "https://meet.google.com/abc-defg-hij",
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=event-1",
+      "updated": "2026-08-25T14:00:00Z",
+      "recurringEventId": "series-1",
+      "originalStartTime": {"dateTime": "2026-08-25T15:00:00-05:00"}
+    },
+    {
+      "id": "event-all-day",
+      "status": "confirmed",
+      "summary": "Planning day",
+      "start": {"date": "2026-08-25"},
+      "end": {"date": "2026-08-26"},
+      "htmlLink": "https://calendar.google.com/calendar/event?eid=event-all-day",
+      "updated": "2026-08-24T12:00:00Z"
+    },
+    {
+      "id": "cancelled",
+      "status": "cancelled",
+      "summary": "Cancelled",
+      "start": {"dateTime": "2026-08-25T17:00:00-05:00"},
+      "end": {"dateTime": "2026-08-25T18:00:00-05:00"}
+    }
+  ],
+  "nextPageToken": "event-page-2"
+}

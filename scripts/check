@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -euo pipefail
+
+project_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
+release_mode=0
+if [[ ${1:-} == "--release" ]]; then
+  release_mode=1
+elif [[ $# -gt 0 ]]; then
+  echo "Usage: scripts/check [--release]" >&2
+  exit 2
+fi
+
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH="$project_root/src"
+
+cd "$project_root"
+python -m unittest discover -s tests -v
+node tests/test_calendar_model.mjs
+node tests/test_settings_model.mjs
+
+qml_linter=$(command -v qmllint || true)
+if [[ -z $qml_linter && -x /usr/lib/qt6/bin/qmllint ]]; then
+  qml_linter=/usr/lib/qt6/bin/qmllint
+fi
+if [[ -n $qml_linter ]]; then
+  for qml_file in "$project_root"/*.qml; do
+    if ! qml_output=$($qml_linter "$qml_file" 2>&1); then
+      echo "$qml_output" >&2
+      exit 1
+    fi
+  done
+  echo "PASS QML syntax"
+else
+  echo "WARN QML syntax checker unavailable"
+fi
+
+if command -v omarchy-plugin-validate >/dev/null 2>&1; then
+  omarchy-plugin-validate "$project_root"
+elif command -v omarchy >/dev/null 2>&1; then
+  omarchy plugin validate "$project_root"
+else
+  echo "WARN omarchy plugin validation unavailable"
+fi
+
+python - "$project_root" <<'PY'
+from __future__ import annotations
+
+import json
+import re
+import stat
+import subprocess
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+failures: list[str] = []
+tracked_files = set(
+    subprocess.check_output(["git", "ls-files", "-z"], cwd=root, text=True).split("\0")
+)
+internal_directories = {".private", ".superpowers"}
+
+
+def scan_path(path: Path) -> bool:
+    relative = path.relative_to(root)
+    return ".git" not in path.parts and (
+        not internal_directories.intersection(relative.parts)
+        or relative.as_posix() in tracked_files
+    )
+
+generated = [
+    path.relative_to(root)
+    for path in root.rglob("*")
+    if scan_path(path) and (path.suffix == ".pyc" or "__pycache__" in path.parts)
+]
+if generated:
+    failures.append("generated files: " + ", ".join(map(str, generated[:8])))
+
+text_files = [
+    path for path in root.rglob("*")
+    if path.is_file()
+    and scan_path(path)
+    and path.suffix not in {".png", ".jpg", ".jpeg", ".gif", ".sqlite", ".db"}
+]
+private_paths: list[str] = []
+secret_hits: list[str] = []
+secret_patterns = (
+    re.compile(r"AIza[0-9A-Za-z_-]{20,}"),
+    re.compile(r"GOCSPX-[0-9A-Za-z_-]{12,}"),
+    re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
+    re.compile(r"eyJ[0-9A-Za-z_-]{10,}\\.[0-9A-Za-z_-]{10,}\\."),
+)
+for path in text_files:
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        continue
+    if re.search(r"(?<![0-9A-Za-z.:/])/home/[0-9A-Za-z._-]+/", text):
+        private_paths.append(str(path.relative_to(root)))
+    if any(pattern.search(text) for pattern in secret_patterns):
+        secret_hits.append(str(path.relative_to(root)))
+if private_paths:
+    failures.append("private paths: " + ", ".join(private_paths))
+if secret_hits:
+    failures.append("secret-shaped values: " + ", ".join(secret_hits))
+
+for executable in (root / "calendarctl", root / "scripts" / "check"):
+    if not executable.is_file() or not executable.stat().st_mode & stat.S_IXUSR:
+        failures.append(f"missing executable target: {executable.relative_to(root)}")
+
+shortcuts = json.loads((root / "docs" / "shortcuts.json").read_text(encoding="utf-8"))
+seen: set[tuple[str, str]] = set()
+for item in shortcuts["shortcuts"]:
+    identity = (item["surface"], item["keys"])
+    if identity in seen:
+        failures.append(f"duplicate shortcut: {identity[0]} {identity[1]}")
+    seen.add(identity)
+
+license_id = "SPDX-License-Identifier: GPL-3.0-or-later"
+source_suffixes = {".py", ".js", ".mjs", ".qml"}
+sources = [root / "calendarctl", *(root / path for path in tracked_files if Path(path).suffix in source_suffixes)]
+for source in sources:
+    if license_id not in "\n".join(source.read_text(encoding="utf-8").splitlines()[:4]):
+        failures.append(f"missing SPDX header: {source.relative_to(root)}")
+
+if failures:
+    for failure in failures:
+        print(f"FAIL {failure}", file=sys.stderr)
+    raise SystemExit(1)
+
+print("PASS zero secrets")
+print("PASS zero private paths")
+print("PASS zero generated files")
+print("PASS zero missing executable targets")
+print("PASS zero duplicate shortcuts")
+print("PASS GPL and SPDX metadata")
+PY
+
+if (( release_mode )); then
+  if [[ -n $(git status --porcelain) ]]; then
+    echo "FAIL Git working tree is not clean" >&2
+    git status --short >&2
+    exit 1
+  fi
+  echo "PASS clean Git diff"
+else
+  if [[ -n $(git status --porcelain) ]]; then
+    echo "INFO Git working tree is dirty during development"
+  else
+    echo "PASS clean Git diff"
+  fi
+fi
+
+echo "Flight Deck Calendar check PASS"

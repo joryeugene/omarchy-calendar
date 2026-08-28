@@ -1,0 +1,13 @@
+{
+  "items": [
+    {
+      "id": "primary@example.com",
+      "summary": "Work",
+      "backgroundColor": "#7aa2f7",
+      "timeZone": "America/Chicago",
+      "selected": true,
+      "primary": true
+    }
+  ],
+  "nextPageToken": "cal-page-2"
+}

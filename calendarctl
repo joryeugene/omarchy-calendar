@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+
+sys.dont_write_bytecode = True
+
+
+HERE = Path(__file__).resolve().parent
+SOURCE = HERE / "src"
+if SOURCE.is_dir():
+    sys.path.insert(0, str(SOURCE))
+else:
+    data_home = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+    sys.path.insert(0, str(data_home / "omarchy-calendar" / "src"))
+
+from omarchy_calendar.cli import main
+
+
+raise SystemExit(main())

@@ -1,0 +1,10 @@
+{
+  "value": [
+    {
+      "id": "calendar-primary",
+      "name": "Personal",
+      "color": "lightBlue"
+    }
+  ],
+  "@odata.nextLink": "https://graph.microsoft.com/v1.0/me/calendars?$skiptoken=calendar-page-2"
+}

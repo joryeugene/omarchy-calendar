@@ -1,0 +1,14 @@
+.worktrees/
+/.private/
+/.superpowers/
+__pycache__/
+*.pyc
+.coverage
+*.db
+*.sqlite
+.env
+.env.*
+providers.json
+*.log
+*.swp
+.DS_Store
