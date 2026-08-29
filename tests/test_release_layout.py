@@ -11,7 +11,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from omarchy_calendar import __version__
+from omarchy_calendar import __version__, settings as settings_module
 
 
 ROOT = Path(__file__).parents[1]
@@ -443,6 +443,29 @@ class ReleaseLayoutTests(unittest.TestCase):
         self.assertEqual(project["project"]["version"], "1.0.0rc3")
         self.assertEqual(__version__, "1.0.0rc3")
         self.assertIn("1.0.0 RC 3", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
+
+    def test_stable_release_requires_bundled_provider_registrations(self):
+        public_setup_copy = "\n".join(
+            (ROOT / path).read_text(encoding="utf-8")
+            for path in ("README.md", "docs/INSTALL.md", "site/index.html")
+        )
+        bundled = settings_module.BUNDLED_PUBLIC_CLIENT_IDS
+        google_credential = settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL
+
+        if "rc" in __version__:
+            self.assertEqual(bundled, {"google": "", "microsoft": ""})
+            self.assertEqual(google_credential, "")
+            self.assertIn("Bring your own", public_setup_copy)
+            return
+
+        self.assertRegex(bundled["google"], r"^[0-9-]+\.apps\.googleusercontent\.com$")
+        self.assertRegex(
+            bundled["microsoft"],
+            r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+        )
+        self.assertTrue(google_credential.startswith("GOCSPX-"))
+        self.assertNotIn("Bring your own OAuth", public_setup_copy)
+        self.assertNotIn("not one-click or seamless", public_setup_copy)
 
     def test_public_tree_excludes_private_reports_and_generated_files(self):
         for internal in (
