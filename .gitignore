@@ -1,6 +1,7 @@
 .worktrees/
 /.private/
 /.superpowers/
+/.wrangler/
 __pycache__/
 *.pyc
 .coverage

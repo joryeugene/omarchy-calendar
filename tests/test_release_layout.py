@@ -513,7 +513,7 @@ class ReleaseLayoutTests(unittest.TestCase):
     def test_gitignore_blocks_local_data_secrets_and_generated_artifacts(self):
         ignored = (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
         for pattern in (
-            "/.private/", "/.superpowers/", "__pycache__/", "*.pyc", "*.db", "*.sqlite", ".env", ".env.*",
+            "/.private/", "/.superpowers/", "/.wrangler/", "__pycache__/", "*.pyc", "*.db", "*.sqlite", ".env", ".env.*",
             "providers.json", "*.log", "*.swp", ".DS_Store",
         ):
             self.assertIn(pattern, ignored)
