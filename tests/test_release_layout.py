@@ -66,6 +66,7 @@ def _static_site_dependency_violations(site):
     violations = []
 
     expected_files = {
+        Path(".well-known/microsoft-identity-association.json"),
         Path("_headers"),
         Path("assets/flight-deck-calendar-week.png"),
         Path("index.html"),
@@ -208,6 +209,18 @@ class ReleaseLayoutTests(unittest.TestCase):
 
         self.assertIn('href="https://github.com/joryeugene/omarchy-calendar"', homepage)
         self.assertEqual(_static_site_dependency_violations(site), [])
+
+    def test_static_site_associates_the_production_microsoft_application(self):
+        association = json.loads(
+            (ROOT / "site" / ".well-known" / "microsoft-identity-association.json")
+            .read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(association, {
+            "associatedApplications": [{
+                "applicationId": "9a7f1138-b541-4840-aa23-e84297de342d",
+            }],
+        })
 
     def test_static_site_dependency_boundary_rejects_unsafe_mutations(self):
         mutations = (
