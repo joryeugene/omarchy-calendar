@@ -25,7 +25,11 @@ class LinkParser(HTMLParser):
 
 class DocumentationTests(unittest.TestCase):
     def test_static_site_local_navigation_resolves_from_each_public_page(self):
-        pages = (SITE / "index.html", SITE / "privacy" / "index.html")
+        pages = (
+            SITE / "index.html",
+            SITE / "privacy" / "index.html",
+            SITE / "terms" / "index.html",
+        )
         for page in pages:
             self.assertTrue(page.is_file(), page)
             parser = LinkParser()
@@ -44,11 +48,14 @@ class DocumentationTests(unittest.TestCase):
     def test_static_site_explains_preview_access_storage_and_deletion_behavior(self):
         homepage_path = SITE / "index.html"
         privacy_path = SITE / "privacy" / "index.html"
+        terms_path = SITE / "terms" / "index.html"
         self.assertTrue(homepage_path.is_file(), homepage_path)
         self.assertTrue(privacy_path.is_file(), privacy_path)
+        self.assertTrue(terms_path.is_file(), terms_path)
         homepage = homepage_path.read_text(encoding="utf-8")
         privacy = privacy_path.read_text(encoding="utf-8")
-        public_copy = homepage + privacy
+        terms = terms_path.read_text(encoding="utf-8")
+        public_copy = homepage + privacy + terms
 
         for required in (
             "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable",
@@ -66,6 +73,8 @@ class DocumentationTests(unittest.TestCase):
             "Calendars.Read",
             "Secret Service",
             "~/.local/state/omarchy-calendar/calendar.db",
+            "account identifiers and labels, calendar identifiers, names, and colors",
+            "event titles, times, locations, descriptions, organizers, status, and meeting and source links",
             "last successful local cache",
             "marked stale",
             "Disconnecting Google or Outlook deletes",
@@ -75,16 +84,41 @@ class DocumentationTests(unittest.TestCase):
             "terminal command",
             "runs immediately when invoked",
             "Uninstalling the plugin alone does not delete data",
+            "uses Google Calendar data only to display",
+            "does not sell, share, or transfer Google user data",
+            "cannot access your calendar data or tokens",
+            "Google API Services User Data Policy, including the Limited Use requirements",
+            "GNU General Public License version 3 or later",
+            "do not replace or limit the GPL",
         ):
             self.assertIn(required, public_copy)
+        self.assertIn('href="privacy/"', homepage)
+        self.assertIn('href="terms/"', homepage)
         for forbidden in (
             "Calendars.ReadWrite",
             "https://www.googleapis.com/auth/calendar</code>",
             "https://www.googleapis.com/auth/calendar.events</code>",
             "one-click account setup",
             "requires two confirmations",
+            "focused desktop workflow",
+            "local-first",
         ):
             self.assertNotIn(forbidden, public_copy)
+
+    def test_repository_privacy_policy_matches_public_data_disclosures(self):
+        policy = (ROOT / "PRIVACY.md").read_text(encoding="utf-8")
+        for required in (
+            "uses Google Calendar data only to display",
+            "does not sell, share, or transfer Google user data",
+            "cannot access calendar data or tokens",
+            "Google API Services User Data Policy, including the Limited Use requirements",
+            "account identifiers and labels; calendar identifiers, names, and colors",
+            "event titles, times, locations, descriptions, organizers, status, and meeting and source links",
+            "choose `Reset local data`, then choose `Confirm reset`",
+            "calendarctl reset-local-data` runs immediately when invoked",
+        ):
+            self.assertIn(required, policy)
+        self.assertNotIn("local-first", policy)
 
     def test_public_preview_docs_put_bring_your_own_oauth_before_installation(self):
         install_command = (

@@ -60,19 +60,41 @@ def _is_public_relative_url(value):
 def _static_site_dependency_violations(site):
     homepage = site / "index.html"
     privacy = site / "privacy" / "index.html"
+    terms = site / "terms" / "index.html"
     published = site / "assets" / "flight-deck-calendar-week.png"
+    headers = site / "_headers"
     violations = []
 
-    for path in (homepage, privacy, site / "styles.css", published):
+    expected_files = {
+        Path("_headers"),
+        Path("assets/flight-deck-calendar-week.png"),
+        Path("index.html"),
+        Path("privacy/index.html"),
+        Path("styles.css"),
+        Path("terms/index.html"),
+    }
+    for path in (homepage, privacy, terms, site / "styles.css", published, headers):
         if not path.is_file():
             violations.append(f"missing artifact: {path.relative_to(site)}")
     if violations:
         return violations
     if published.read_bytes() != (ROOT / "screenshots" / "flight-deck-calendar-week.png").read_bytes():
         violations.append("published Week image differs from the approved asset")
-    suffixes = {path.suffix for path in site.rglob("*") if path.is_file()}
-    if suffixes != {".html", ".css", ".png"}:
-        violations.append(f"unexpected site file types: {sorted(suffixes)}")
+    actual_files = {path.relative_to(site) for path in site.rglob("*") if path.is_file()}
+    unexpected = sorted(actual_files - expected_files)
+    if unexpected:
+        violations.append(f"unexpected site files: {[str(path) for path in unexpected]}")
+
+    header_text = headers.read_text(encoding="utf-8")
+    for required in (
+        "Content-Security-Policy: default-src 'none'; style-src 'self'; img-src 'self';",
+        "frame-ancestors 'none'",
+        "Referrer-Policy: no-referrer",
+        "X-Content-Type-Options: nosniff",
+        "Permissions-Policy: camera=(), microphone=(), geolocation=()",
+    ):
+        if required not in header_text:
+            violations.append(f"missing security header: {required}")
 
     for page in sorted(site.rglob("*.html")):
         parser = ElementParser()

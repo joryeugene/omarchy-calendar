@@ -17,9 +17,9 @@
       <span>Flight Deck Calendar</span>
     </a>
     <nav aria-label="Primary navigation">
-      <a href="../#workflow">Workflow</a>
       <a href="../#install">Install</a>
       <a href="./" aria-current="page">Privacy</a>
+      <a href="../terms/">Terms</a>
       <a href="https://github.com/joryeugene/omarchy-calendar">Source</a>
     </nav>
   </header>
@@ -28,7 +28,8 @@
     <header class="privacy-hero shell">
       <p class="eyebrow"><span aria-hidden="true"></span> Privacy and provider access</p>
       <h1>Calendar data stays on your workstation.</h1>
-      <p class="lede">Flight Deck Calendar has no hosted backend, telemetry, analytics, advertising, or AI integration. The product reads provider calendars and keeps the working copy local.</p>
+      <p class="lede">Flight Deck Calendar has no hosted backend, telemetry, analytics, advertising, or AI integration. The app reads provider calendars and keeps the working copy local.</p>
+      <p class="policy-meta">Effective August 29, 2026.</p>
     </header>
 
     <div class="privacy-layout shell">
@@ -47,7 +48,10 @@
           <h2 id="provider-title">The provider grants are narrow and read-only.</h2>
           <p>Google authorization requests <code>openid</code>, <code>email</code>, <code>https://www.googleapis.com/auth/calendar.events.readonly</code>, and <code>https://www.googleapis.com/auth/calendar.calendarlist.readonly</code>. It also requests offline access so the local service can refresh in the background.</p>
           <p>Personal Outlook.com authorization uses Microsoft&apos;s <code>/consumers</code> authority and requests <code>openid</code>, <code>profile</code>, <code>offline_access</code>, <code>User.Read</code>, and <code>Calendars.Read</code>.</p>
+          <p>Flight Deck uses Google Calendar data only to display calendars and events, select the current or nearest event, and open a meeting or source link when you ask it to. The developer cannot access your calendar data or tokens because the app sends neither to a Flight Deck server.</p>
+          <p>Flight Deck does not sell, share, or transfer Google user data to the developer, advertisers, analytics services, AI systems, or other third parties. Your workstation communicates directly with Google and Microsoft only to authorize the account, read the calendars you selected, and refresh the local cache.</p>
           <p>Flight Deck requests no calendar write scope and provides no route for event creation, editing, deletion, invitations, or scheduling.</p>
+          <p>Flight Deck Calendar&apos;s use and transfer of information received from Google APIs adheres to the <a class="inline-link" href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy, including the Limited Use requirements</a>.</p>
         </section>
 
         <section id="local-storage" aria-labelledby="storage-title">
@@ -64,7 +68,7 @@
             </div>
             <div>
               <dt>Calendar cache</dt>
-              <dd>Flight Deck stores normalized events and provider health in the local SQLite cache at <code>~/.local/state/omarchy-calendar/calendar.db</code> with private permissions.</dd>
+              <dd>Flight Deck stores account identifiers and labels, calendar identifiers, names, and colors, event titles, times, locations, descriptions, organizers, status, and meeting and source links, plus provider refresh health. The local SQLite cache is <code>~/.local/state/omarchy-calendar/calendar.db</code> with private permissions.</dd>
             </div>
             <div>
               <dt>Provider overrides</dt>
@@ -92,6 +96,7 @@
           <p class="eyebrow">05 / This website</p>
           <h2 id="website-title">The verification site is static.</h2>
           <p>The site code contains no JavaScript, analytics, cookies, tracking, forms, advertising, backend, or database. It loads its stylesheet and product image from relative paths in the same public site.</p>
+          <p>The <a class="inline-link" href="../terms/">Terms of Service</a> describe the software license, provider boundaries, and preview status.</p>
         </section>
       </div>
     </div>
@@ -101,6 +106,7 @@
     <p>Flight Deck Calendar keeps its read-only working data on the local workstation.</p>
     <div>
       <a href="../">Product</a>
+      <a href="../terms/">Terms</a>
       <a href="https://github.com/joryeugene/omarchy-calendar/blob/main/PRIVACY.md">Repository policy</a>
     </div>
   </footer>
