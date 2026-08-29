@@ -15,6 +15,26 @@ ROOT = Path(__file__).parents[1]
 
 
 class ReleaseLayoutTests(unittest.TestCase):
+    def test_static_site_has_no_executable_or_remote_resource_dependency(self):
+        site = ROOT / "site"
+        homepage = site / "index.html"
+        privacy = site / "privacy" / "index.html"
+        approved = ROOT / "screenshots" / "flight-deck-calendar-week.png"
+        published = site / "assets" / "flight-deck-calendar-week.png"
+
+        for path in (homepage, privacy, site / "styles.css", published):
+            self.assertTrue(path.is_file(), path)
+        self.assertEqual(published.read_bytes(), approved.read_bytes())
+        self.assertEqual(
+            {path.suffix for path in site.rglob("*") if path.is_file()},
+            {".html", ".css", ".png"},
+        )
+
+        markup = homepage.read_text(encoding="utf-8") + privacy.read_text(encoding="utf-8")
+        for forbidden in ("<script", "<form", "<iframe", "<object", "<embed"):
+            self.assertNotIn(forbidden, markup.lower())
+        self.assertNotIn("@import", (site / "styles.css").read_text(encoding="utf-8").lower())
+
     def test_release_check_rejects_tracked_test_source_without_spdx(self):
         with tempfile.TemporaryDirectory() as temporary:
             release_root = Path(temporary) / "release"

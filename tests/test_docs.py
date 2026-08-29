@@ -1,14 +1,87 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import json
 import unittest
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).parents[1]
 GUIDE_DATA = ROOT / "docs" / "shortcuts.json"
+SITE = ROOT / "site"
+
+
+class LinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.targets = []
+
+    def handle_starttag(self, tag, attributes):
+        attribute_name = "src" if tag == "img" else "href" if tag in {"a", "link"} else ""
+        values = dict(attributes)
+        if attribute_name and values.get(attribute_name):
+            self.targets.append(values[attribute_name])
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_static_site_local_navigation_resolves_from_each_public_page(self):
+        pages = (SITE / "index.html", SITE / "privacy" / "index.html")
+        for page in pages:
+            self.assertTrue(page.is_file(), page)
+            parser = LinkParser()
+            parser.feed(page.read_text(encoding="utf-8"))
+            for target in parser.targets:
+                parsed = urlsplit(target)
+                if parsed.scheme or parsed.netloc or target.startswith("#"):
+                    continue
+                self.assertFalse(parsed.path.startswith("/"), (page, target))
+                resolved = (page.parent / unquote(parsed.path)).resolve()
+                self.assertTrue(resolved.is_relative_to(SITE.resolve()), (page, target))
+                if resolved.is_dir():
+                    resolved /= "index.html"
+                self.assertTrue(resolved.is_file(), (page, target))
+
+    def test_static_site_explains_preview_access_storage_and_deletion_behavior(self):
+        homepage_path = SITE / "index.html"
+        privacy_path = SITE / "privacy" / "index.html"
+        self.assertTrue(homepage_path.is_file(), homepage_path)
+        self.assertTrue(privacy_path.is_file(), privacy_path)
+        homepage = homepage_path.read_text(encoding="utf-8")
+        privacy = privacy_path.read_text(encoding="utf-8")
+        public_copy = homepage + privacy
+
+        for required in (
+            "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable",
+            "Bring your own desktop OAuth registration",
+            "Google Desktop OAuth app",
+            "Microsoft public desktop app",
+            "not one-click or seamless",
+            "https://www.googleapis.com/auth/calendar.events.readonly",
+            "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+            "openid",
+            "email",
+            "profile",
+            "offline_access",
+            "User.Read",
+            "Calendars.Read",
+            "Secret Service",
+            "~/.local/state/omarchy-calendar/calendar.db",
+            "last successful local cache",
+            "marked stale",
+            "Disconnecting Google or Outlook deletes",
+            "calendarctl reset-local-data",
+            "two confirmations",
+            "Uninstalling the plugin alone does not delete data",
+        ):
+            self.assertIn(required, public_copy)
+        for forbidden in (
+            "Calendars.ReadWrite",
+            "https://www.googleapis.com/auth/calendar</code>",
+            "https://www.googleapis.com/auth/calendar.events</code>",
+            "one-click account setup",
+        ):
+            self.assertNotIn(forbidden, public_copy)
+
     def test_public_preview_docs_put_bring_your_own_oauth_before_installation(self):
         install_command = (
             "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable"

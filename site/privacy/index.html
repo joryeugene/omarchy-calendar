@@ -1,0 +1,107 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Flight Deck Calendar keeps provider tokens and cached calendar data on the local Omarchy workstation.">
+  <title>Privacy | Flight Deck Calendar</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="Flight Deck Calendar home">
+      <span class="brand-mark" aria-hidden="true">FD</span>
+      <span>Flight Deck Calendar</span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="../#workflow">Workflow</a>
+      <a href="../#install">Install</a>
+      <a href="./" aria-current="page">Privacy</a>
+      <a href="https://github.com/joryeugene/omarchy-calendar">Source</a>
+    </nav>
+  </header>
+
+  <main id="main" class="privacy-main">
+    <header class="privacy-hero shell">
+      <p class="eyebrow"><span aria-hidden="true"></span> Privacy and provider access</p>
+      <h1>Calendar data stays on your workstation.</h1>
+      <p class="lede">Flight Deck Calendar has no hosted backend, telemetry, analytics, advertising, or AI integration. The product reads provider calendars and keeps the working copy local.</p>
+    </header>
+
+    <div class="privacy-layout shell">
+      <nav class="privacy-nav" aria-label="Privacy page sections">
+        <p>On this page</p>
+        <a href="#provider-access">Provider access</a>
+        <a href="#local-storage">Local storage</a>
+        <a href="#refresh-disconnect">Refresh and disconnect</a>
+        <a href="#deletion">Deletion</a>
+        <a href="#website">This website</a>
+      </nav>
+
+      <div class="privacy-content">
+        <section id="provider-access" aria-labelledby="provider-title">
+          <p class="eyebrow">01 / Provider access</p>
+          <h2 id="provider-title">The provider grants are narrow and read-only.</h2>
+          <p>Google authorization requests <code>openid</code>, <code>email</code>, <code>https://www.googleapis.com/auth/calendar.events.readonly</code>, and <code>https://www.googleapis.com/auth/calendar.calendarlist.readonly</code>. It also requests offline access so the local service can refresh in the background.</p>
+          <p>Personal Outlook.com authorization uses Microsoft&apos;s <code>/consumers</code> authority and requests <code>openid</code>, <code>profile</code>, <code>offline_access</code>, <code>User.Read</code>, and <code>Calendars.Read</code>.</p>
+          <p>Flight Deck requests no calendar write scope and provides no route for event creation, editing, deletion, invitations, or scheduling.</p>
+        </section>
+
+        <section id="local-storage" aria-labelledby="storage-title">
+          <p class="eyebrow">02 / Local storage</p>
+          <h2 id="storage-title">Secrets and calendar data have separate local homes.</h2>
+          <dl class="fact-list">
+            <div>
+              <dt>OAuth tokens</dt>
+              <dd>Flight Deck stores access and refresh tokens in the desktop Secret Service keyring under the <code>omarchy-calendar</code> application attribute.</dd>
+            </div>
+            <div>
+              <dt>Google app credential</dt>
+              <dd>Flight Deck stores an imported Google Desktop app credential as a separate Secret Service item instead of writing it to the repository or a dotfile.</dd>
+            </div>
+            <div>
+              <dt>Calendar cache</dt>
+              <dd>Flight Deck stores normalized events and provider health in the local SQLite cache at <code>~/.local/state/omarchy-calendar/calendar.db</code> with private permissions.</dd>
+            </div>
+            <div>
+              <dt>Provider overrides</dt>
+              <dd>Local developer builds may store public client IDs at <code>~/.config/omarchy-calendar/providers.json</code> with private permissions.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section id="refresh-disconnect" aria-labelledby="refresh-title">
+          <p class="eyebrow">03 / Refresh and disconnect</p>
+          <h2 id="refresh-title">A failed refresh does not erase the last good view.</h2>
+          <p>One singleton Omarchy service refreshes providers every 5, 15, or 30 minutes according to the local setting. When the network is unavailable, Flight Deck keeps the last successful local cache visible and marked stale.</p>
+          <p>Disconnecting Google or Outlook deletes that provider&apos;s OAuth tokens from Secret Service and removes its cached accounts and events immediately. Disconnecting does not change the provider calendar.</p>
+        </section>
+
+        <section id="deletion" aria-labelledby="deletion-title">
+          <p class="eyebrow">04 / Deletion</p>
+          <h2 id="deletion-title">Reset local data before uninstalling.</h2>
+          <p><code>calendarctl reset-local-data</code> requires two confirmations. It deletes all Flight Deck provider tokens, imported Google app credentials, cached events, provider health records, and local provider client-ID overrides.</p>
+          <p>The reset preserves appearance settings and does not change Google or Microsoft calendar data. Uninstalling the plugin alone does not delete data, so run the reset command first when complete local removal is wanted.</p>
+        </section>
+
+        <section id="website" aria-labelledby="website-title">
+          <p class="eyebrow">05 / This website</p>
+          <h2 id="website-title">The verification site is static.</h2>
+          <p>The site code contains no JavaScript, analytics, cookies, tracking, forms, advertising, backend, or database. It loads its stylesheet and product image from relative paths in the same public site.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer shell">
+    <p>Flight Deck Calendar keeps its read-only working data on the local workstation.</p>
+    <div>
+      <a href="../">Product</a>
+      <a href="https://github.com/joryeugene/omarchy-calendar/blob/main/PRIVACY.md">Repository policy</a>
+    </div>
+  </footer>
+</body>
+</html>
