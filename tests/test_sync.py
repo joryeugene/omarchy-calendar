@@ -107,6 +107,34 @@ class SyncEngineTests(unittest.TestCase):
         self.assertTrue(view["providers"][0]["stale"])
         self.assertEqual(view["providers"][0]["last_error"], "offline")
 
+    def test_refresh_failure_preserves_cache_and_redacts_provider_secrets(self):
+        class FailingHttp:
+            def post_token(self, _url, _form):
+                raise HttpError(0, "access_token=refreshed-secret provider offline")
+
+        keyring = FakeKeyring(
+            {"access_token": "old", "refresh_token": "refresh", "expires_at": 0},
+            app_credential="desktop-credential",
+        )
+        engine = SyncEngine(
+            self.store,
+            keyring=keyring,
+            settings=ProviderSettings(google_client_id="google-client"),
+            providers={"google": FakeProvider()},
+            http=FailingHttp(),
+            now=lambda: datetime(2026, 8, 25, 12, tzinfo=timezone.utc),
+        )
+
+        result = engine.sync("google")
+
+        self.assertEqual(result["failed"], 1)
+        self.assertNotIn("refreshed-secret", str(result))
+        self.assertEqual(keyring.puts, [])
+        view = self.store.view(*self.window)
+        self.assertEqual(view["events"][0]["uid"], "google:a:c:old")
+        self.assertTrue(view["providers"][0]["stale"])
+        self.assertNotIn("refreshed-secret", view["providers"][0]["last_error"])
+
     def test_expired_token_refreshes_before_provider_read(self):
         provider = FakeProvider((Account("google", "a", "a@example.com"), [sample_event()]))
         keyring = FakeKeyring(

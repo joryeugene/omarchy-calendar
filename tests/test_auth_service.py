@@ -10,6 +10,7 @@ import omarchy_calendar.settings as settings_module
 from omarchy_calendar.auth_service import Authenticator
 from omarchy_calendar.cache import CalendarStore
 from omarchy_calendar.cli import seed_demo
+from omarchy_calendar.http import HttpError
 from omarchy_calendar.models import Account
 from omarchy_calendar.oauth import GOOGLE_SCOPES, OAuthFlow
 from omarchy_calendar.settings import ProviderSettings
@@ -228,6 +229,57 @@ class AuthenticatorTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, "exchange failed"):
                 auth.authenticate("google")
 
+            view = store.view("2026-08-25T00:00:00Z", "2026-08-26T00:00:00Z")
+            self.assertTrue(view["demo"])
+            self.assertEqual(len(view["events"]), 10)
+            store.close()
+
+    def test_offline_initial_provider_read_stores_no_token_and_preserves_demo(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = CalendarStore(Path(temporary) / "calendar.db")
+            seed_demo(store, date(2026, 8, 25))
+            keyring = FakeKeyring(None, app_credential="desktop-credential")
+            auth = Authenticator(
+                store,
+                keyring=keyring,
+                http=FakeHttp({
+                    "access_token": "access", "refresh_token": "refresh", "expires_in": 3600
+                }),
+                settings=ProviderSettings(google_client_id="google-client"),
+                providers={"google": FakeProvider(error=HttpError(0, "offline"))},
+                browser=lambda _url: True,
+                receiver_factory=FakeReceiver,
+                flow_factory=lambda: OAuthFlow.for_test(verifier="v" * 64, state="state"),
+                now=lambda: datetime(2026, 8, 25, 12, tzinfo=timezone.utc),
+            )
+
+            with self.assertRaisesRegex(HttpError, "offline"):
+                auth.authenticate("google")
+
+            self.assertEqual(keyring.puts, [])
+            view = store.view("2026-08-25T00:00:00Z", "2026-08-26T00:00:00Z")
+            self.assertTrue(view["demo"])
+            self.assertEqual(len(view["events"]), 10)
+            store.close()
+
+    def test_browser_launch_failure_stores_no_token_and_preserves_demo(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            store = CalendarStore(Path(temporary) / "calendar.db")
+            seed_demo(store, date(2026, 8, 25))
+            keyring = FakeKeyring(None, app_credential="desktop-credential")
+            auth = Authenticator(
+                store,
+                keyring=keyring,
+                settings=ProviderSettings(google_client_id="google-client"),
+                providers={"google": FakeProvider()},
+                browser=lambda _url: False,
+                receiver_factory=FakeReceiver,
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "Could not open the browser"):
+                auth.authenticate("google")
+
+            self.assertEqual(keyring.puts, [])
             view = store.view("2026-08-25T00:00:00Z", "2026-08-26T00:00:00Z")
             self.assertTrue(view["demo"])
             self.assertEqual(len(view["events"]), 10)
