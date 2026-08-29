@@ -93,6 +93,7 @@ Item {
           border.color: selected ? root.palette.accent : "transparent"
           border.width: 1
           Text {
+            textFormat: Text.PlainText
             anchors.centerIn: parent
             text: Qt.formatDate(parent.day, "ddd  d")
             color: parent.selected || parent.today ? root.palette.accent : root.palette.foreground
@@ -113,6 +114,7 @@ Item {
         width: root.timeGutter
         height: parent.height
         Text {
+          textFormat: Text.PlainText
           anchors.right: parent.right
           anchors.rightMargin: Style.space(8)
           anchors.verticalCenter: parent.verticalCenter
@@ -153,6 +155,7 @@ Item {
                   ? root.palette.accent : modelData.calendar_color || root.palette.border
                 border.width: 1
                 Text {
+                  textFormat: Text.PlainText
                   anchors.fill: parent
                   anchors.leftMargin: Style.space(4)
                   anchors.rightMargin: Style.space(4)
@@ -193,6 +196,7 @@ Item {
           Repeater {
             model: root.endHour - root.startHour + 1
             Text {
+              textFormat: Text.PlainText
               required property int index
               y: root.topPadding + index * root.hourHeight - height / 2
               width: parent.width - Style.space(8)
@@ -256,6 +260,7 @@ Item {
                   anchors.margins: Style.space(5)
                   spacing: 1
                   Text {
+                    textFormat: Text.PlainText
                     width: parent.width
                     text: String(modelData.title || "Untitled event")
                     color: root.palette.foreground
@@ -267,6 +272,7 @@ Item {
                     elide: Text.ElideRight
                   }
                   Text {
+                    textFormat: Text.PlainText
                     width: parent.width
                     visible: parent.parent.height >= Style.space(44)
                     text: CalendarModel.formatTime(modelData).split(" to ")[0]
@@ -330,6 +336,7 @@ Item {
         anchors.margins: Style.space(4)
         spacing: Style.space(8)
         Text {
+          textFormat: Text.PlainText
           width: parent.width * 0.2
           height: parent.height
           text: root.selectedEvent ? CalendarModel.formatTime(root.selectedEvent) : "No selection"
@@ -341,6 +348,7 @@ Item {
           elide: Text.ElideRight
         }
         Text {
+          textFormat: Text.PlainText
           width: parent.width * (root.overlapPosition ? 0.34 : 0.5)
           height: parent.height
           text: root.selectedEvent ? String(root.selectedEvent.title || "Untitled event") : "Use j and k to select"
@@ -352,6 +360,7 @@ Item {
           elide: Text.ElideRight
         }
         Text {
+          textFormat: Text.PlainText
           visible: Boolean(root.overlapPosition)
           width: visible ? parent.width * 0.16 : 0
           height: parent.height
@@ -365,6 +374,7 @@ Item {
           elide: Text.ElideRight
         }
         Text {
+          textFormat: Text.PlainText
           width: parent.width * 0.25
           height: parent.height
           text: root.selectedEvent && root.selectedEvent.meeting_url ? "m Meeting   o Source" : "o Source"

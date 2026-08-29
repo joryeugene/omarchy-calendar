@@ -28,6 +28,8 @@ Rectangle {
     spacing: Style.space(14)
 
     Text {
+
+      textFormat: Text.PlainText
       text: "KEYBOARD MAP"
       color: root.palette.accent
       font.family: root.fontFamily
@@ -59,6 +61,7 @@ Rectangle {
             anchors.margins: Style.space(12)
             spacing: Style.space(4)
             Text {
+              textFormat: Text.PlainText
               text: modelData.title.toUpperCase()
               color: root.palette.accent
               font.family: root.fontFamily
@@ -80,6 +83,7 @@ Rectangle {
                   border.color: root.palette.border
                   border.width: 1
                   Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     text: String(modelData[0])
                     color: root.palette.foreground
@@ -89,6 +93,7 @@ Rectangle {
                   }
                 }
                 Text {
+                  textFormat: Text.PlainText
                   width: parent.width - Style.space(90)
                   text: String(modelData[1])
                   color: root.palette.muted

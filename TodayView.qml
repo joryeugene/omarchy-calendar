@@ -57,6 +57,8 @@ Item {
       radius: Style.space(10)
 
       Text {
+
+        textFormat: Text.PlainText
         id: todayTitle
         anchors.left: parent.left
         anchors.leftMargin: Style.space(18)
@@ -72,6 +74,8 @@ Item {
       }
 
       Text {
+
+        textFormat: Text.PlainText
         anchors.left: todayTitle.left
         anchors.top: todayTitle.bottom
         anchors.topMargin: Style.space(3)
@@ -125,6 +129,8 @@ Item {
               }
 
               Text {
+
+                textFormat: Text.PlainText
                 anchors.left: parent.left
                 anchors.leftMargin: Style.space(15)
                 anchors.verticalCenter: parent.verticalCenter
@@ -143,6 +149,7 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: Style.space(3)
                 Text {
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: String(modelData.title || "Untitled event")
                   color: root.palette.foreground
@@ -152,6 +159,7 @@ Item {
                   elide: Text.ElideRight
                 }
                 Text {
+                  textFormat: Text.PlainText
                   width: parent.width
                   text: String(modelData.calendar_name || "") + "  " + CalendarModel.providerLabel(modelData.provider)
                   color: root.palette.muted
@@ -162,6 +170,8 @@ Item {
               }
 
               Text {
+
+                textFormat: Text.PlainText
                 id: meetingLabel
                 anchors.right: parent.right
                 anchors.rightMargin: Style.space(12)

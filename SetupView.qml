@@ -64,7 +64,7 @@ Rectangle {
     Row {
       width: parent.width
       height: Style.space(38)
-      Text { width: parent.width - Style.space(140); text: "CONNECT " + root.providerName.toUpperCase(); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true; elide: Text.ElideRight }
+      Text { textFormat: Text.PlainText; width: parent.width - Style.space(140); text: "CONNECT " + root.providerName.toUpperCase(); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true; elide: Text.ElideRight }
       Rectangle {
         width: Style.space(132)
         height: Style.space(34)
@@ -73,6 +73,7 @@ Rectangle {
         border.color: root.palette.border
         border.width: 1
         Text {
+          textFormat: Text.PlainText
           anchors.centerIn: parent
           text: "Back to Settings"
           color: root.palette.foreground
@@ -85,6 +86,8 @@ Rectangle {
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       text: root.providerState.client_configured
         ? "Registration is ready. Connect in the browser and return after granting read-only calendar access."
@@ -109,8 +112,9 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: Style.space(14)
         spacing: Style.space(8)
-        Text { text: "WHAT FLIGHT DECK REQUESTS"; color: root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; font.letterSpacing: 0.8 }
+        Text { textFormat: Text.PlainText; text: "WHAT FLIGHT DECK REQUESTS"; color: root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; font.letterSpacing: 0.8 }
         Text {
+          textFormat: Text.PlainText
           width: parent.width
           text: root.provider === "microsoft"
             ? "Identity and profile so the account can be labeled\nCalendars.Read for events and calendar lists\nOffline access for automatic local refresh"
@@ -137,7 +141,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: Style.space(12)
         spacing: Style.space(7)
-        Text { text: "MICROSOFT APPLICATION ID"; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+        Text { textFormat: Text.PlainText; text: "MICROSOFT APPLICATION ID"; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
         Rectangle {
           width: parent.width
           height: Style.space(44)
@@ -145,7 +149,7 @@ Rectangle {
           color: Qt.rgba(1, 1, 1, 0.04)
           border.color: clientInput.activeFocus ? root.palette.accent : root.palette.border
           border.width: 1
-          Text { anchors.left: parent.left; anchors.leftMargin: Style.space(10); anchors.verticalCenter: parent.verticalCenter; visible: clientInput.text === ""; text: root.clientPlaceholder; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight; width: parent.width - Style.space(20) }
+          Text { textFormat: Text.PlainText; anchors.left: parent.left; anchors.leftMargin: Style.space(10); anchors.verticalCenter: parent.verticalCenter; visible: clientInput.text === ""; text: root.clientPlaceholder; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight; width: parent.width - Style.space(20) }
           TextInput {
             id: clientInput
             objectName: "publicClientInput"
@@ -185,6 +189,7 @@ Rectangle {
       border.width: 1
       opacity: root.busy ? 0.65 : 1
       Text {
+        textFormat: Text.PlainText
         anchors.centerIn: parent
         text: root.busy ? "Working" : root.providerState.client_configured
           ? "Connect in browser" : root.provider === "google"
@@ -202,6 +207,8 @@ Rectangle {
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       text: root.errorText
       color: root.palette.urgent
@@ -211,6 +218,8 @@ Rectangle {
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       text: root.provider === "google"
         ? "The Desktop app credential and tokens stay in the system keyring. Only the public client ID is saved in local settings. Calendar data stays in a private local SQLite cache. No hosted backend."

@@ -192,6 +192,8 @@ Rectangle {
         spacing: Style.space(8)
 
         Text {
+
+          textFormat: Text.PlainText
           text: "SETTINGS"
           color: root.palette.accent
           font.family: root.fontFamily
@@ -214,6 +216,7 @@ Rectangle {
             border.color: root.sectionIndex === index ? root.palette.accent : "transparent"
             border.width: 1
             Text {
+              textFormat: Text.PlainText
               anchors.left: parent.left
               anchors.leftMargin: Style.space(12)
               anchors.verticalCenter: parent.verticalCenter
@@ -230,6 +233,8 @@ Rectangle {
       }
 
       Text {
+
+        textFormat: Text.PlainText
         objectName: "settingsKeyboardHint"
         anchors.left: parent.left
         anchors.right: parent.right
@@ -256,6 +261,7 @@ Rectangle {
           width: parent.width
           height: Style.space(36)
           Text {
+            textFormat: Text.PlainText
             width: parent.width - Style.space(160)
             text: root.sections[root.sectionIndex]
             color: root.palette.foreground
@@ -264,6 +270,7 @@ Rectangle {
             font.bold: true
           }
           Text {
+            textFormat: Text.PlainText
             width: Style.space(160)
             text: root.busy ? "WORKING" : "Live preview"
             color: root.busy ? root.palette.accent : root.palette.muted
@@ -291,6 +298,8 @@ Rectangle {
               spacing: Style.space(10)
 
             Text {
+
+              textFormat: Text.PlainText
               width: parent.width
               text: "Authenticate in your browser after private provider setup. Tokens stay in the system keyring and events stay in the local cache."
               color: root.palette.muted
@@ -320,9 +329,9 @@ Rectangle {
                   anchors.verticalCenter: parent.verticalCenter
                   width: parent.width - Style.space(190)
                   spacing: Style.space(5)
-                  Text { text: String(modelData.label || modelData.provider); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
-                  Text { text: modelData.connected ? "Connected and read-only" : modelData.client_configured ? "Ready to connect" : "Local developer registration needed"; color: modelData.connected ? root.palette.positive : root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
-                  Text { width: parent.width; text: modelData.connected ? CalendarModel.updateStatus([modelData], new Date()) : "No live sync yet"; color: modelData.stale ? root.palette.urgent : root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight }
+                  Text { textFormat: Text.PlainText; text: String(modelData.label || modelData.provider); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
+                  Text { textFormat: Text.PlainText; text: modelData.connected ? "Connected and read-only" : modelData.client_configured ? "Ready to connect" : "Local developer registration needed"; color: modelData.connected ? root.palette.positive : root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
+                  Text { textFormat: Text.PlainText; width: parent.width; text: modelData.connected ? CalendarModel.updateStatus([modelData], new Date()) : "No live sync yet"; color: modelData.stale ? root.palette.urgent : root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight }
                 }
 
                 Rectangle {
@@ -337,6 +346,7 @@ Rectangle {
                   border.color: modelData.connected ? root.palette.urgent : root.palette.accent
                   border.width: 1
                   Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     text: modelData.connected
                       ? root.pendingDisconnect === modelData.provider ? "Confirm disconnect" : "Disconnect"
@@ -359,6 +369,8 @@ Rectangle {
               spacing: Style.space(8)
 
               Text {
+
+                textFormat: Text.PlainText
                 text: "VISIBLE CALENDARS"
                 color: root.palette.accent
                 font.family: root.fontFamily
@@ -367,6 +379,7 @@ Rectangle {
                 font.letterSpacing: 0.8
               }
               Text {
+                textFormat: Text.PlainText
                 width: parent.width
                 text: "Hidden calendars stay synchronized and can be shown again instantly. Only opaque local selectors are saved in appearance settings."
                 color: root.palette.muted
@@ -375,6 +388,7 @@ Rectangle {
                 wrapMode: Text.Wrap
               }
               Text {
+                textFormat: Text.PlainText
                 visible: root.calendars.length === 0
                 width: parent.width
                 text: "Calendars appear here after their first event is cached."
@@ -396,6 +410,7 @@ Rectangle {
                     height: Style.space(30)
                     spacing: Style.space(8)
                     Text {
+                      textFormat: Text.PlainText
                       width: parent.width - Style.space(172)
                       anchors.verticalCenter: parent.verticalCenter
                       text: String(providerCalendarGroup.modelData.label)
@@ -414,7 +429,7 @@ Rectangle {
                       border.color: current ? root.palette.accent : root.palette.border
                       border.width: current ? 2 : 1
                       onCurrentChanged: if (current) Qt.callLater(function() { root.revealSettingsItem(showAllButton) })
-                      Text { anchors.centerIn: parent; text: "Show all"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
+                      Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "Show all"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
                       MouseArea { anchors.fill: parent; onClicked: { root.controlIndex = root.groupControlIndex(providerCalendarGroup.modelData.provider, true); root.setProviderVisible(providerCalendarGroup.modelData.provider, true) } }
                     }
                     Rectangle {
@@ -427,7 +442,7 @@ Rectangle {
                       border.color: current ? root.palette.accent : root.palette.border
                       border.width: current ? 2 : 1
                       onCurrentChanged: if (current) Qt.callLater(function() { root.revealSettingsItem(hideAllButton) })
-                      Text { anchors.centerIn: parent; text: "Hide all"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
+                      Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "Hide all"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale }
                       MouseArea { anchors.fill: parent; onClicked: { root.controlIndex = root.groupControlIndex(providerCalendarGroup.modelData.provider, false); root.setProviderVisible(providerCalendarGroup.modelData.provider, false) } }
                     }
                   }
@@ -456,6 +471,7 @@ Rectangle {
                         color: String(modelData.color || root.palette.accent)
                       }
                       Text {
+                        textFormat: Text.PlainText
                         anchors.left: parent.left
                         anchors.leftMargin: Style.space(28)
                         anchors.verticalCenter: parent.verticalCenter
@@ -468,6 +484,7 @@ Rectangle {
                         elide: Text.ElideRight
                       }
                       Text {
+                        textFormat: Text.PlainText
                         anchors.right: visibilityToggle.left
                         anchors.rightMargin: Style.space(12)
                         anchors.verticalCenter: parent.verticalCenter
@@ -487,7 +504,7 @@ Rectangle {
                         color: root.isCalendarHidden(modelData.key) ? "transparent" : Qt.rgba(0.478, 0.635, 0.969, 0.18)
                         border.color: root.isCalendarHidden(modelData.key) ? root.palette.muted : root.palette.accent
                         border.width: 1
-                        Text { anchors.centerIn: parent; text: root.isCalendarHidden(modelData.key) ? "Hidden" : "Shown"; color: root.isCalendarHidden(modelData.key) ? root.palette.muted : root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+                        Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: root.isCalendarHidden(modelData.key) ? "Hidden" : "Shown"; color: root.isCalendarHidden(modelData.key) ? root.palette.muted : root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
                       }
                       MouseArea { anchors.fill: parent; onClicked: root.toggleCalendar(modelData.key) }
                     }
@@ -507,6 +524,7 @@ Rectangle {
               border.width: current ? 2 : 1
               onCurrentChanged: if (current) Qt.callLater(function() { root.revealSettingsItem(resetCard) })
               Text {
+                textFormat: Text.PlainText
                 anchors.left: parent.left
                 anchors.leftMargin: Style.space(14)
                 anchors.verticalCenter: parent.verticalCenter
@@ -525,7 +543,7 @@ Rectangle {
                 color: root.pendingReset ? root.palette.urgent : "transparent"
                 border.color: root.palette.urgent
                 border.width: 1
-                Text { anchors.centerIn: parent; text: root.pendingReset ? "Confirm reset" : "Reset local data"; color: root.pendingReset ? root.palette.background : root.palette.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+                Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: root.pendingReset ? "Confirm reset" : "Reset local data"; color: root.pendingReset ? root.palette.background : root.palette.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
                 MouseArea { anchors.fill: parent; onClicked: root.resetRequested() }
               }
             }
@@ -555,8 +573,8 @@ Rectangle {
                   anchors.verticalCenter: parent.verticalCenter
                   width: parent.width - Style.space(330)
                   spacing: Style.space(2)
-                  Text { width: parent.width; text: String(modelData.label); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; font.bold: true; elide: Text.ElideRight }
-                  Text { width: parent.width; visible: Boolean(modelData.description); text: String(modelData.description || ""); color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight }
+                  Text { textFormat: Text.PlainText; width: parent.width; text: String(modelData.label); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; font.bold: true; elide: Text.ElideRight }
+                  Text { textFormat: Text.PlainText; width: parent.width; visible: Boolean(modelData.description); text: String(modelData.description || ""); color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; elide: Text.ElideRight }
                 }
                 Row {
                   anchors.right: parent.right
@@ -564,6 +582,7 @@ Rectangle {
                   anchors.verticalCenter: parent.verticalCenter
                   spacing: Style.space(8)
                   Text {
+                    textFormat: Text.PlainText
                     width: Style.space(58)
                     height: parent.height
                     text: "Previous"
@@ -581,10 +600,11 @@ Rectangle {
                     color: Qt.rgba(0.478, 0.635, 0.969, 0.12)
                     border.color: root.palette.accent
                     border.width: 1
-                    Text { anchors.centerIn: parent; text: String(modelData.options[root.selectedOption(modelData)].label); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+                    Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: String(modelData.options[root.selectedOption(modelData)].label); color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
                     MouseArea { anchors.fill: parent; onClicked: root.cycleControl(index, 1) }
                   }
                   Text {
+                    textFormat: Text.PlainText
                     width: Style.space(34)
                     height: parent.height
                     text: "Next"
@@ -608,6 +628,7 @@ Rectangle {
               border.color: root.palette.border
               border.width: 1
               Text {
+                textFormat: Text.PlainText
                 anchors.left: parent.left
                 anchors.leftMargin: Style.space(14)
                 anchors.verticalCenter: parent.verticalCenter
@@ -632,13 +653,15 @@ Rectangle {
                     color: Qt.rgba(0.478, 0.635, 0.969, 0.12)
                     border.color: root.palette.border
                     border.width: 1
-                    Text { anchors.left: parent.left; anchors.leftMargin: Style.space(8); anchors.verticalCenter: parent.verticalCenter; text: index === 0 ? "09:30  Design review" : "11:00  Focus block"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Math.max(9, Style.font.caption * root.textScale); elide: Text.ElideRight; width: parent.width - Style.space(16) }
+                    Text { textFormat: Text.PlainText; anchors.left: parent.left; anchors.leftMargin: Style.space(8); anchors.verticalCenter: parent.verticalCenter; text: index === 0 ? "09:30  Design review" : "11:00  Focus block"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Math.max(9, Style.font.caption * root.textScale); elide: Text.ElideRight; width: parent.width - Style.space(16) }
                   }
                 }
               }
             }
 
             Text {
+
+              textFormat: Text.PlainText
               width: parent.width
               visible: root.sectionIndex === 2
               text: "Clock formats remain available as inline config keys: format, formatAlt, verticalFormat, and verticalFormatAlt."
@@ -665,9 +688,9 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: Style.space(14)
                 spacing: Style.space(8)
-                Text { text: "Flight Deck Calendar  1.0.0 RC 3"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
-                Text { width: parent.width; text: "Read-only Google and Outlook calendar for Omarchy. No hosted backend, telemetry, analytics, or AI."; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; wrapMode: Text.Wrap }
-                Text { width: parent.width; text: "Scopes\nGoogle: identity, calendar lists, and events read-only\nMicrosoft: identity, profile, and Calendars.Read\n\nStorage\nOAuth tokens: Secret Service keyring\nCalendar data: local SQLite cache"; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; lineHeight: 1.35; wrapMode: Text.Wrap }
+                Text { textFormat: Text.PlainText; text: "Flight Deck Calendar  1.0.0 RC 3"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
+                Text { textFormat: Text.PlainText; width: parent.width; text: "Read-only Google and Outlook calendar for Omarchy. No hosted backend, telemetry, analytics, or AI."; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; wrapMode: Text.Wrap }
+                Text { textFormat: Text.PlainText; width: parent.width; text: "Scopes\nGoogle: identity, calendar lists, and events read-only\nMicrosoft: identity, profile, and Calendars.Read\n\nStorage\nOAuth tokens: Secret Service keyring\nCalendar data: local SQLite cache"; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; lineHeight: 1.35; wrapMode: Text.Wrap }
               }
             }
 
@@ -678,7 +701,7 @@ Rectangle {
               color: root.pendingReset ? Qt.rgba(0.969, 0.463, 0.557, 0.16) : "transparent"
               border.color: root.controlIndex === 1 ? root.palette.urgent : root.palette.border
               border.width: root.controlIndex === 1 ? 2 : 1
-              Text { anchors.left: parent.left; anchors.leftMargin: Style.space(14); anchors.verticalCenter: parent.verticalCenter; text: root.pendingReset ? "Confirm reset to erase all calendar data" : "Reset local data"; color: root.pendingReset ? root.palette.urgent : root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; font.bold: true }
+              Text { textFormat: Text.PlainText; anchors.left: parent.left; anchors.leftMargin: Style.space(14); anchors.verticalCenter: parent.verticalCenter; text: root.pendingReset ? "Confirm reset to erase all calendar data" : "Reset local data"; color: root.pendingReset ? root.palette.urgent : root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; font.bold: true }
               Rectangle {
                 anchors.right: parent.right
                 anchors.rightMargin: Style.space(12)
@@ -690,6 +713,7 @@ Rectangle {
                 border.color: root.palette.urgent
                 border.width: 1
                 Text {
+                  textFormat: Text.PlainText
                   anchors.centerIn: parent
                   text: root.pendingReset ? "Confirm reset" : "Reset local data"
                   color: root.pendingReset ? root.palette.background : root.palette.urgent
@@ -704,6 +728,8 @@ Rectangle {
         }
 
         Text {
+
+          textFormat: Text.PlainText
           width: parent.width
           height: Style.space(18)
           text: root.errorText
@@ -726,6 +752,7 @@ Rectangle {
             border.color: root.palette.border
             border.width: 1
             Text {
+              textFormat: Text.PlainText
               anchors.centerIn: parent
               text: "Cancel"
               color: root.palette.foreground
@@ -741,6 +768,7 @@ Rectangle {
             radius: Style.space(6)
             color: root.palette.accent
             Text {
+              textFormat: Text.PlainText
               anchors.centerIn: parent
               text: "Apply"
               color: root.palette.background

@@ -286,6 +286,20 @@ class QmlContractTests(unittest.TestCase):
             self.assertNotIn(forbidden, executable)
         self.assertNotIn("—", all_copy)
 
+    def test_every_qml_text_object_forces_plain_text(self):
+        for path in sorted(PLUGIN.glob("*.qml")):
+            source = path.read_text(encoding="utf-8")
+            text_objects = re.findall(r"\bText\s*\{", source)
+            protected = re.findall(
+                r"\bText\s*\{\s*textFormat\s*:\s*Text\.PlainText\b",
+                source,
+            )
+            self.assertEqual(
+                len(protected),
+                len(text_objects),
+                f"{path.name} leaves a Text object on AutoText",
+            )
+
     def test_qml_child_objects_are_not_separated_by_semicolons(self):
         qml = "\n".join(self.text(path.name) for path in PLUGIN.glob("*.qml"))
         self.assertIsNone(re.search(r"}\s*;\s*(?:MouseArea|Text|Rectangle|Row|Column|Item)\s*{", qml))

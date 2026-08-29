@@ -566,6 +566,8 @@ Panel {
             border.width: 0
 
             Text {
+
+              textFormat: Text.PlainText
               anchors.left: parent.left
               anchors.leftMargin: Style.space(18)
               anchors.verticalCenter: parent.verticalCenter
@@ -591,7 +593,7 @@ Panel {
                   border.color: root.activeTab === modelData.key ? root.palette.accent : root.palette.border
                   border.width: 1
                   Behavior on color { enabled: root.motionDuration > 0; ColorAnimation { duration: root.motionDuration } }
-                  Text { anchors.centerIn: parent; text: modelData.label; color: root.activeTab === modelData.key ? root.palette.background : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+                  Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: modelData.label; color: root.activeTab === modelData.key ? root.palette.background : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
                   MouseArea { anchors.fill: parent; onClicked: root.setTab(modelData.key) }
                 }
               }
@@ -602,10 +604,10 @@ Panel {
               anchors.rightMargin: Style.space(16)
               anchors.verticalCenter: parent.verticalCenter
               spacing: Style.space(10)
-              Text { text: root.updateStatus; color: root.demoData ? "#e0af68" : root.syncing ? root.palette.accent : root.updateStatus === "Offline" ? root.palette.urgent : root.palette.muted; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale }
-              Text { text: "Refresh  r"; color: root.syncing ? root.palette.muted : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; enabled: !root.syncing; onClicked: root.refreshProviders() } }
-              Text { text: "Settings  s"; color: root.showSettings ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.openSettings(1) } }
-              Text { text: "Help  ?"; color: root.showHelp ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.showHelp = !root.showHelp } }
+              Text { textFormat: Text.PlainText; text: root.updateStatus; color: root.demoData ? "#e0af68" : root.syncing ? root.palette.accent : root.updateStatus === "Offline" ? root.palette.urgent : root.palette.muted; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale }
+              Text { textFormat: Text.PlainText; text: "Refresh  r"; color: root.syncing ? root.palette.muted : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; enabled: !root.syncing; onClicked: root.refreshProviders() } }
+              Text { textFormat: Text.PlainText; text: "Settings  s"; color: root.showSettings ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.openSettings(1) } }
+              Text { textFormat: Text.PlainText; text: "Help  ?"; color: root.showHelp ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.showHelp = !root.showHelp } }
             }
           }
 
@@ -690,14 +692,15 @@ Panel {
                 anchors.fill: parent
                 anchors.margins: Style.space(22)
                 spacing: Style.space(14)
-                Text { text: root.errorText !== "" ? "CALENDAR UNAVAILABLE" : root.filteredEmpty ? "NO VISIBLE EVENTS" : "YOUR CALENDAR COCKPIT IS READY"; color: root.errorText !== "" ? root.palette.urgent : root.palette.accent; font.family: root.contentFontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
-                Text { width: parent.width; text: root.errorText !== "" ? root.errorText : root.filteredEmpty ? "Every cached calendar in this period is hidden. Open Calendar settings to show one or more." : "Connect Google Calendar or personal Outlook.com in Settings. Private builds require provider registration once; everything remains read-only and local."; color: root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; wrapMode: Text.Wrap }
+                Text { textFormat: Text.PlainText; text: root.errorText !== "" ? "CALENDAR UNAVAILABLE" : root.filteredEmpty ? "NO VISIBLE EVENTS" : "YOUR CALENDAR COCKPIT IS READY"; color: root.errorText !== "" ? root.palette.urgent : root.palette.accent; font.family: root.contentFontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
+                Text { textFormat: Text.PlainText; width: parent.width; text: root.errorText !== "" ? root.errorText : root.filteredEmpty ? "Every cached calendar in this period is hidden. Open Calendar settings to show one or more." : "Connect Google Calendar or personal Outlook.com in Settings. Private builds require provider registration once; everything remains read-only and local."; color: root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; wrapMode: Text.Wrap }
                 Rectangle {
                   width: parent.width
                   height: Style.space(44)
                   radius: Style.space(7)
                   color: root.palette.accent
                   Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     text: root.errorText !== "" ? "r  Try again" : root.filteredEmpty ? "c  Calendar visibility" : "c  Connect calendars"
                     color: root.palette.background
@@ -715,6 +718,7 @@ Panel {
                   border.color: root.palette.border
                   border.width: 1
                   Text {
+                    textFormat: Text.PlainText
                     anchors.centerIn: parent
                     text: root.errorText !== "" ? "c  Calendar settings" : "Load fictional demo data"
                     color: root.palette.foreground
@@ -787,7 +791,7 @@ Panel {
               anchors.fill: parent
               color: Qt.rgba(0, 0, 0, 0.58)
               z: 50
-              Text { anchors.centerIn: parent; text: "Loading local calendar"; color: root.palette.accent; font.family: root.contentFontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
+              Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "Loading local calendar"; color: root.palette.accent; font.family: root.contentFontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
             }
           }
         }

@@ -45,12 +45,14 @@ Rectangle {
       color: previousHover.hovered ? Qt.rgba(0.478, 0.635, 0.969, 0.18) : "transparent"
       border.color: root.palette.border
       border.width: 1
-      Text { anchors.centerIn: parent; text: "‹"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
+      Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "‹"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
       HoverHandler { id: previousHover }
       MouseArea { anchors.fill: parent; onClicked: root.previousRequested() }
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: Style.space(290)
       height: Style.space(32)
       text: root.periodLabel()
@@ -71,7 +73,7 @@ Rectangle {
       color: nextHover.hovered ? Qt.rgba(0.478, 0.635, 0.969, 0.18) : "transparent"
       border.color: root.palette.border
       border.width: 1
-      Text { anchors.centerIn: parent; text: "›"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
+      Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "›"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.title * root.textScale; font.bold: true }
       HoverHandler { id: nextHover }
       MouseArea { anchors.fill: parent; onClicked: root.nextRequested() }
     }
@@ -85,7 +87,7 @@ Rectangle {
       border.color: root.palette.accent
       border.width: 1
       Behavior on color { enabled: root.motionDuration > 0; ColorAnimation { duration: root.motionDuration } }
-      Text { anchors.centerIn: parent; text: "Now  g"; color: nowHover.hovered ? root.palette.background : root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
+      Text { textFormat: Text.PlainText; anchors.centerIn: parent; text: "Now  g"; color: nowHover.hovered ? root.palette.background : root.palette.accent; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true }
       HoverHandler { id: nowHover }
       MouseArea { anchors.fill: parent; onClicked: root.nowRequested() }
     }

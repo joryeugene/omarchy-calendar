@@ -39,6 +39,8 @@ Rectangle {
     spacing: Style.space(7)
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       text: root.eventData ? String(root.eventData.title || "Untitled event") : "Select an event"
       color: root.palette.foreground || "white"
@@ -51,6 +53,8 @@ Rectangle {
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       text: root.eventData
         ? CalendarModel.formatTime(root.eventData)
@@ -62,6 +66,8 @@ Rectangle {
     }
 
     Text {
+
+      textFormat: Text.PlainText
       width: parent.width
       visible: !!(root.eventData && root.eventData.location)
       text: root.eventData ? String(root.eventData.location) : ""
@@ -103,6 +109,7 @@ Rectangle {
       opacity: root.hasMeeting ? 1 : 0.72
       Behavior on color { enabled: root.motionDuration > 0; ColorAnimation { duration: root.motionDuration } }
       Text {
+        textFormat: Text.PlainText
         anchors.centerIn: parent
         text: root.hasMeeting ? "m  Join meeting" : "No meeting link"
         color: root.hasMeeting ? root.palette.background : root.palette.muted
@@ -121,6 +128,7 @@ Rectangle {
       border.color: root.hasSource ? root.palette.accent : root.palette.border
       opacity: root.hasSource ? 1 : 0.72
       Text {
+        textFormat: Text.PlainText
         anchors.centerIn: parent
         text: root.hasSource ? "o  Source" : "No source link"
         color: root.hasSource ? root.palette.foreground : root.palette.muted
@@ -152,6 +160,8 @@ Rectangle {
       spacing: Style.space(6)
 
       Text {
+
+        textFormat: Text.PlainText
         text: "CONNECTION"
         color: root.palette.accent
         font.family: root.fontFamily
@@ -167,6 +177,7 @@ Rectangle {
           width: parent.width
           height: Style.space(20) * root.textScale
           Text {
+            textFormat: Text.PlainText
             width: Style.space(78)
             text: modelData.label
             color: root.palette.muted
@@ -174,6 +185,7 @@ Rectangle {
             font.pixelSize: Style.font.caption * root.textScale
           }
           Text {
+            textFormat: Text.PlainText
             width: parent.width - Style.space(78)
             text: modelData.value
             color: root.palette.foreground
@@ -202,6 +214,8 @@ Rectangle {
     border.width: 1
 
     Text {
+
+      textFormat: Text.PlainText
       id: detailLabel
       anchors.left: parent.left
       anchors.top: parent.top
@@ -234,6 +248,8 @@ Rectangle {
         spacing: Style.space(10)
 
         Text {
+
+          textFormat: Text.PlainText
           width: parent.width
           text: root.eventData && root.eventData.description
             ? String(root.eventData.description)
@@ -247,6 +263,8 @@ Rectangle {
         }
 
         Text {
+
+          textFormat: Text.PlainText
           width: parent.width
           visible: root.actionError !== ""
           text: root.actionError
