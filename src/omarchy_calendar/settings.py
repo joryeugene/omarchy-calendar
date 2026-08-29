@@ -15,6 +15,7 @@ BUNDLED_PUBLIC_CLIENT_IDS = {
     "google": "",
     "microsoft": "",
 }
+BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ""
 
 
 def default_settings_path() -> Path:
@@ -52,6 +53,25 @@ class ProviderSettings:
         if provider == "microsoft":
             return self.microsoft_client_id or BUNDLED_PUBLIC_CLIENT_IDS[provider]
         raise ValueError(f"unsupported provider: {provider}")
+
+    def google_app_credential(self, keyring: object) -> str:
+        if self.google_client_id:
+            getter = getattr(keyring, "get_app_credential")
+            return str(getter("google") or "").strip()
+        if BUNDLED_PUBLIC_CLIENT_IDS["google"]:
+            return BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL.strip()
+        return ""
+
+    def registration_source(self, provider: str) -> str:
+        if provider == "google":
+            local_client_id = self.google_client_id
+        elif provider == "microsoft":
+            local_client_id = self.microsoft_client_id
+        else:
+            raise ValueError(f"unsupported provider: {provider}")
+        if local_client_id:
+            return "local"
+        return "bundled" if BUNDLED_PUBLIC_CLIENT_IDS[provider] else ""
 
     def with_client_id(self, provider: str, client_id: str) -> "ProviderSettings":
         if provider not in ("google", "microsoft"):

@@ -110,6 +110,76 @@ def _static_site_dependency_violations(site):
 
 
 class ReleaseLayoutTests(unittest.TestCase):
+    def _run_release_scanner_with_google_credential(self, temporary, *, duplicate_path=None):
+        release_root = Path(temporary) / "release"
+        shutil.copytree(
+            ROOT,
+            release_root,
+            ignore=shutil.ignore_patterns(
+                ".git", ".private", ".superpowers", "__pycache__", "*.pyc"
+            ),
+        )
+        for test_module in (release_root / "tests").glob("test_*.py"):
+            test_module.unlink()
+        (release_root / "tests" / "test_smoke.py").write_text(
+            "# SPDX-License-Identifier: GPL-3.0-or-later\n"
+            "import unittest\n\n"
+            "class SmokeTest(unittest.TestCase):\n"
+            "    def test_release_fixture(self):\n"
+            "        self.assertTrue(True)\n",
+            encoding="utf-8",
+        )
+
+        credential = "GOC" + "SPX-" + ("Ab1_" * 4)
+        settings = release_root / "src" / "omarchy_calendar" / "settings.py"
+        source = settings.read_text(encoding="utf-8")
+        before = 'BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ""'
+        after = f'BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = "{credential}"'
+        if before not in source:
+            insertion = "\n\ndef default_settings_path"
+            self.assertIn(insertion, source)
+            source = source.replace(insertion, f"\n\n{before}{insertion}", 1)
+        settings.write_text(source.replace(before, after, 1), encoding="utf-8")
+        if duplicate_path is not None:
+            duplicate = release_root / duplicate_path
+            duplicate.write_text(
+                duplicate.read_text(encoding="utf-8")
+                + f"\nUnexpected credential fixture: {credential}\n",
+                encoding="utf-8",
+            )
+
+        for command in (
+            ["git", "init", "-q"],
+            ["git", "config", "user.email", "release-check@example.com"],
+            ["git", "config", "user.name", "Release Check"],
+            ["git", "add", "."],
+            ["git", "commit", "-qm", "scanner fixture"],
+        ):
+            subprocess.run(command, cwd=release_root, check=True)
+
+        return subprocess.run(
+            [str(release_root / "scripts" / "check"), "--release"],
+            cwd=release_root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    def test_release_scanner_allows_only_the_canonical_bundled_google_credential_field(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            allowed = self._run_release_scanner_with_google_credential(temporary)
+
+        self.assertEqual(allowed.returncode, 0, allowed.stderr)
+        self.assertIn("PASS zero secrets", allowed.stdout)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            duplicated = self._run_release_scanner_with_google_credential(
+                temporary, duplicate_path=Path("PRIVACY.md")
+            )
+
+        self.assertNotEqual(duplicated.returncode, 0, duplicated.stdout)
+        self.assertIn("FAIL secret-shaped values: PRIVACY.md", duplicated.stderr)
+
     def test_static_site_allows_external_anchor_links_without_resource_dependencies(self):
         site = ROOT / "site"
         homepage = (site / "index.html").read_text(encoding="utf-8")

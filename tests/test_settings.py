@@ -11,6 +11,13 @@ from omarchy_calendar.settings import ProviderSettings
 
 
 class ProviderSettingsTests(unittest.TestCase):
+    def test_bundled_registration_defaults_stay_empty_until_production_values_exist(self):
+        self.assertEqual(settings_module.BUNDLED_PUBLIC_CLIENT_IDS, {
+            "google": "",
+            "microsoft": "",
+        })
+        self.assertEqual(settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL, "")
+
     def test_loads_only_public_client_identifiers(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "providers.json"
@@ -31,19 +38,70 @@ class ProviderSettingsTests(unittest.TestCase):
         self.assertEqual(settings.microsoft_client_id, "")
 
     def test_bundled_public_ids_are_defaults_and_local_overrides_win(self):
-        with patch.object(settings_module, "BUNDLED_PUBLIC_CLIENT_IDS", {
-            "google": "bundled.apps.googleusercontent.com",
-            "microsoft": "00001111-aaaa-2222-bbbb-3333cccc4444",
-        }, create=True):
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "00001111-aaaa-2222-bbbb-3333cccc4444",
+            },
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL="bundled-google-credential",
+            create=True,
+        ):
             bundled = ProviderSettings()
-            override = ProviderSettings(google_client_id="local.apps.googleusercontent.com")
+            google_override = ProviderSettings(
+                google_client_id="local.apps.googleusercontent.com"
+            )
+            microsoft_override = ProviderSettings(
+                microsoft_client_id="55555555-6666-7777-8888-999999999999"
+            )
+
+            class FakeKeyring:
+                def __init__(self, credential):
+                    self.credential = credential
+                    self.lookups = []
+
+                def get_app_credential(self, provider):
+                    self.lookups.append(provider)
+                    return self.credential
+
+            bundled_keyring = FakeKeyring("must-not-be-used")
+            local_keyring = FakeKeyring("local-google-credential")
+            missing_local_keyring = FakeKeyring("")
 
             self.assertEqual(bundled.client_id("google"), "bundled.apps.googleusercontent.com")
             self.assertEqual(
                 bundled.client_id("microsoft"),
                 "00001111-aaaa-2222-bbbb-3333cccc4444",
             )
-            self.assertEqual(override.client_id("google"), "local.apps.googleusercontent.com")
+            self.assertEqual(
+                bundled.google_app_credential(bundled_keyring),
+                "bundled-google-credential",
+            )
+            self.assertEqual(bundled_keyring.lookups, [])
+            self.assertEqual(bundled.registration_source("google"), "bundled")
+            self.assertEqual(bundled.registration_source("microsoft"), "bundled")
+
+            self.assertEqual(
+                google_override.client_id("google"),
+                "local.apps.googleusercontent.com",
+            )
+            self.assertEqual(
+                google_override.google_app_credential(local_keyring),
+                "local-google-credential",
+            )
+            self.assertEqual(local_keyring.lookups, ["google"])
+            self.assertEqual(google_override.registration_source("google"), "local")
+
+            self.assertEqual(
+                google_override.google_app_credential(missing_local_keyring),
+                "",
+            )
+            self.assertEqual(missing_local_keyring.lookups, ["google"])
+            self.assertEqual(
+                microsoft_override.client_id("microsoft"),
+                "55555555-6666-7777-8888-999999999999",
+            )
+            self.assertEqual(microsoft_override.registration_source("microsoft"), "local")
 
     def test_updates_one_public_client_id_with_private_atomic_storage(self):
         with tempfile.TemporaryDirectory() as temporary:

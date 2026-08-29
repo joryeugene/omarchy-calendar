@@ -109,11 +109,14 @@ def setup_status(
         connected = [item for item in real if item["connected"]]
         configured = bool(settings.client_id(provider))
         if provider == "google" and configured:
-            configured = bool((keyring or SecretServiceStore()).get_app_credential("google"))
+            configured = bool(
+                settings.google_app_credential(keyring or SecretServiceStore())
+            )
         providers.append({
             "provider": provider,
             "label": label,
             "client_configured": configured,
+            "registration_source": settings.registration_source(provider),
             "connected": bool(connected),
             "accounts": len(real),
             "stale": any(bool(item["stale"]) for item in real),

@@ -49,7 +49,7 @@ class Authenticator:
             raise ValueError(f"{provider} public client ID is not configured")
         app_credential = ""
         if provider == "google":
-            app_credential = self.keyring.get_app_credential(provider)
+            app_credential = self.settings.google_app_credential(self.keyring)
             if not app_credential:
                 raise ValueError("Google Desktop credentials are not configured")
         flow = self.flow_factory()

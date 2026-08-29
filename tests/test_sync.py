@@ -3,7 +3,9 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
+import omarchy_calendar.settings as settings_module
 from omarchy_calendar.cache import CalendarStore
 from omarchy_calendar.http import HttpError
 from omarchy_calendar.models import Account, Event, ProviderHealth
@@ -127,6 +129,98 @@ class SyncEngineTests(unittest.TestCase):
         self.assertEqual(http.posts[0][1]["grant_type"], "refresh_token")
         self.assertEqual(http.posts[0][1]["client_secret"], "desktop-credential")
         self.assertEqual(keyring.puts[-1][2]["refresh_token"], "refresh")
+
+    def test_expired_google_token_refreshes_with_the_bundled_registration_pair(self):
+        class NoLocalCredentialKeyring(FakeKeyring):
+            def get_app_credential(self, _provider):
+                raise AssertionError("bundled refresh must not read a local app credential")
+
+        provider = FakeProvider((Account("google", "a", "a@example.com"), [sample_event()]))
+        keyring = NoLocalCredentialKeyring({
+            "access_token": "old", "refresh_token": "refresh", "expires_at": 0
+        })
+        http = FakeHttp({"access_token": "new", "expires_in": 3600})
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "",
+            },
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL="bundled-google-credential",
+            create=True,
+        ):
+            engine = SyncEngine(
+                self.store, keyring=keyring, settings=ProviderSettings(),
+                providers={"google": provider}, http=http,
+                now=lambda: datetime(2026, 8, 25, 12, tzinfo=timezone.utc),
+            )
+
+            result = engine.sync("google")
+
+        self.assertEqual(result["synced"], 1)
+        self.assertEqual(
+            http.posts[0][1]["client_id"],
+            "bundled.apps.googleusercontent.com",
+        )
+        self.assertEqual(
+            http.posts[0][1]["client_secret"],
+            "bundled-google-credential",
+        )
+
+    def test_local_google_refresh_requires_its_own_credential_without_bundle_mixing(self):
+        provider = FakeProvider((Account("google", "a", "a@example.com"), [sample_event()]))
+        keyring = FakeKeyring({
+            "access_token": "old", "refresh_token": "refresh", "expires_at": 0
+        })
+        http = FakeHttp({"access_token": "must-not-be-used", "expires_in": 3600})
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "",
+            },
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL="bundled-google-credential",
+            create=True,
+        ):
+            result = SyncEngine(
+                self.store, keyring=keyring,
+                settings=ProviderSettings(
+                    google_client_id="local.apps.googleusercontent.com"
+                ),
+                providers={"google": provider}, http=http,
+                now=lambda: datetime(2026, 8, 25, 12, tzinfo=timezone.utc),
+            ).sync("google")
+
+        self.assertEqual(result["failed"], 1)
+        self.assertEqual(http.posts, [])
+        self.assertIn("Desktop credentials", result["accounts"][0]["error"])
+
+    def test_valid_existing_token_sync_does_not_consult_new_bundled_registration(self):
+        class RegistrationGuardKeyring(FakeKeyring):
+            def get_app_credential(self, _provider):
+                raise AssertionError("a valid token must not consult app registration")
+
+        provider = FakeProvider((Account("google", "a", "a@example.com"), [sample_event()]))
+        keyring = RegistrationGuardKeyring({
+            "access_token": "existing", "refresh_token": "refresh", "expires_at": 9999999999
+        })
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "00001111-aaaa-2222-bbbb-3333cccc4444",
+            },
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL="bundled-google-credential",
+            create=True,
+        ):
+            result = SyncEngine(
+                self.store, keyring=keyring, settings=ProviderSettings(),
+                providers={"google": provider},
+                now=lambda: datetime(2026, 8, 25, 12, tzinfo=timezone.utc),
+            ).sync("google")
+
+        self.assertEqual(result["synced"], 1)
+        self.assertEqual(provider.last_token, "existing")
 
     def test_microsoft_refresh_never_uses_google_desktop_credential(self):
         self.store.replace_window(

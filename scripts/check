@@ -90,6 +90,10 @@ secret_patterns = (
     re.compile(r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----"),
     re.compile(r"eyJ[0-9A-Za-z_-]{10,}\\.[0-9A-Za-z_-]{10,}\\."),
 )
+bundled_google_credential = re.compile(
+    r'(?m)^(BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ")'
+    r'GOCSPX-[0-9A-Za-z_-]{12,}(")$'
+)
 for path in text_files:
     try:
         text = path.read_text(encoding="utf-8")
@@ -97,7 +101,12 @@ for path in text_files:
         continue
     if re.search(r"(?<![0-9A-Za-z.:/])/home/[0-9A-Za-z._-]+/", text):
         private_paths.append(str(path.relative_to(root)))
-    if any(pattern.search(text) for pattern in secret_patterns):
+    scan_text = text
+    if path.relative_to(root).as_posix() == "src/omarchy_calendar/settings.py":
+        scan_text = bundled_google_credential.sub(
+            r"\1[allowed-public-native-app-credential]\2", scan_text, count=1
+        )
+    if any(pattern.search(scan_text) for pattern in secret_patterns):
         secret_hits.append(str(path.relative_to(root)))
 if private_paths:
     failures.append("private paths: " + ", ".join(private_paths))

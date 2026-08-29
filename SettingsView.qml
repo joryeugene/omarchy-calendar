@@ -301,7 +301,7 @@ Rectangle {
 
               textFormat: Text.PlainText
               width: parent.width
-              text: "Authenticate in your browser after private provider setup. Tokens stay in the system keyring and events stay in the local cache."
+              text: "Authenticate in your browser when connecting. Tokens stay in the system keyring and events stay in the local cache."
               color: root.palette.muted
               font.family: root.fontFamily
               font.pixelSize: Style.font.bodySmall * root.textScale
