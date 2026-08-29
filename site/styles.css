@@ -2,8 +2,6 @@
 :root {
   color-scheme: dark;
   --bg: #080b16;
-  --panel: #101527;
-  --panel-raised: #151b30;
   --text: #f7f8ff;
   --muted: #a5aec5;
   --line: rgba(185, 200, 235, 0.17);

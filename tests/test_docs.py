@@ -70,7 +70,9 @@ class DocumentationTests(unittest.TestCase):
             "marked stale",
             "Disconnecting Google or Outlook deletes",
             "calendarctl reset-local-data",
-            "two confirmations",
+            "in-app Reset local data action requires two confirmations",
+            "terminal command",
+            "runs immediately when invoked",
             "Uninstalling the plugin alone does not delete data",
         ):
             self.assertIn(required, public_copy)
