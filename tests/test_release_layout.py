@@ -16,7 +16,7 @@ from omarchy_calendar import __version__
 
 ROOT = Path(__file__).parents[1]
 CSS_URL = re.compile(r"\burl\s*\(", re.IGNORECASE)
-ACTIVE_TAGS = {"script", "form", "iframe", "object", "embed"}
+ACTIVE_TAGS = {"base", "script", "form", "iframe", "object", "embed"}
 MEDIA_ATTRIBUTES = {
     "audio": ("src",),
     "img": ("src", "srcset"),
@@ -119,6 +119,13 @@ class ReleaseLayoutTests(unittest.TestCase):
 
     def test_static_site_dependency_boundary_rejects_unsafe_mutations(self):
         mutations = (
+            (
+                "base URL",
+                "index.html",
+                "<head>",
+                '<head>\n  <base href="https://example.com/">',
+                "active <base> element",
+            ),
             (
                 "remote stylesheet",
                 "index.html",

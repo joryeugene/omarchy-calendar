@@ -70,7 +70,8 @@ class DocumentationTests(unittest.TestCase):
             "marked stale",
             "Disconnecting Google or Outlook deletes",
             "calendarctl reset-local-data",
-            "in-app Reset local data action requires two confirmations",
+            "in-app flow uses two activations",
+            "choose Reset local data, then choose Confirm reset",
             "terminal command",
             "runs immediately when invoked",
             "Uninstalling the plugin alone does not delete data",
@@ -81,6 +82,7 @@ class DocumentationTests(unittest.TestCase):
             "https://www.googleapis.com/auth/calendar</code>",
             "https://www.googleapis.com/auth/calendar.events</code>",
             "one-click account setup",
+            "requires two confirmations",
         ):
             self.assertNotIn(forbidden, public_copy)
 
