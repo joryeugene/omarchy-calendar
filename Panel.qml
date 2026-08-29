@@ -75,6 +75,7 @@ Panel {
   readonly property int gridEndHour: Number(previewSettings.weekEndHour)
   readonly property bool syncing: calendarService ? calendarService.syncing : false
   readonly property string updateStatus: root.demoData ? "Demo" : root.syncing ? "Updating" : CalendarModel.updateStatus(root.providers, root.nowTime)
+  readonly property bool updateNeedsAttention: root.updateStatus.indexOf("reconnect") >= 0 || root.updateStatus.indexOf("stale") >= 0 || root.updateStatus.indexOf("Offline") >= 0
 
   Timer {
     interval: 60000
@@ -207,7 +208,8 @@ Panel {
     if (!event) return ""
     for (var i = 0; i < providers.length; i++) {
       if (providers[i].provider === event.provider && providers[i].account_id === event.account_id) {
-        if (providers[i].stale) return "Offline, showing cached data"
+        if (providers[i].stale)
+          return providers[i].connected === false ? "Needs reconnect, showing cached data" : "Offline, showing cached data"
         return CalendarModel.updateStatus([providers[i]], root.nowTime)
       }
     }
@@ -604,7 +606,7 @@ Panel {
               anchors.rightMargin: Style.space(16)
               anchors.verticalCenter: parent.verticalCenter
               spacing: Style.space(10)
-              Text { textFormat: Text.PlainText; text: root.updateStatus; color: root.demoData ? "#e0af68" : root.syncing ? root.palette.accent : root.updateStatus === "Offline" ? root.palette.urgent : root.palette.muted; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale }
+              Text { textFormat: Text.PlainText; text: root.updateStatus; color: root.demoData ? "#e0af68" : root.syncing ? root.palette.accent : root.updateNeedsAttention ? root.palette.urgent : root.palette.muted; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale }
               Text { textFormat: Text.PlainText; text: "Refresh  r"; color: root.syncing ? root.palette.muted : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; enabled: !root.syncing; onClicked: root.refreshProviders() } }
               Text { textFormat: Text.PlainText; text: "Settings  s"; color: root.showSettings ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.openSettings(1) } }
               Text { textFormat: Text.PlainText; text: "Help  ?"; color: root.showHelp ? root.palette.accent : root.palette.foreground; font.family: root.contentFontFamily; font.pixelSize: Style.font.caption * root.textScale; font.bold: true; MouseArea { anchors.fill: parent; onClicked: root.showHelp = !root.showHelp } }

@@ -196,10 +196,23 @@ test("clock format ring starts from the configured ISO label", () => {
   assert.equal(model.nextClockFormat(ring, ring[0]), "dddd yyyy/MM/dd HH:mm")
 })
 
-test("header update status is concise and reports the stalest connected provider", () => {
+test("header status distinguishes provider recovery from a full outage", () => {
   const now = new Date("2026-08-27T12:00:00Z")
   assert.equal(model.updateStatus([], now), "No accounts")
-  assert.equal(model.updateStatus([{ stale: true, last_sync: "2026-08-27T11:59:00Z" }], now), "Offline")
+  assert.equal(model.updateStatus([
+    { provider: "google", connected: false, stale: true, last_sync: "2026-08-27T11:59:00Z" },
+  ], now), "Google needs reconnect")
+  assert.equal(model.updateStatus([
+    { provider: "google", connected: false, stale: true, last_sync: "2026-08-27T11:59:00Z" },
+    { provider: "microsoft", connected: true, stale: false, last_sync: "2026-08-27T11:59:45Z" },
+  ], now), "Google needs reconnect")
+  assert.equal(model.updateStatus([
+    { provider: "google", connected: true, stale: true, last_sync: "2026-08-27T11:59:00Z" },
+    { provider: "microsoft", connected: true, stale: false, last_sync: "2026-08-27T11:59:45Z" },
+  ], now), "Google stale")
+  assert.equal(model.updateStatus([
+    { provider: "google", connected: true, stale: true, last_sync: "2026-08-27T11:59:00Z" },
+  ], now), "Offline, cached")
   assert.equal(model.updateStatus([{ stale: false, last_sync: "2026-08-27T11:59:45Z" }], now), "Updated just now")
   assert.equal(model.updateStatus([
     { stale: false, last_sync: "2026-08-27T11:58:00Z" },

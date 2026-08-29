@@ -84,6 +84,8 @@ class QmlContractTests(unittest.TestCase):
     def test_header_status_is_compact_enough_not_to_overlap_navigation(self):
         panel = self.text("Panel.qml")
         self.assertIn("CalendarModel.updateStatus(root.providers, root.nowTime)", panel)
+        self.assertIn("readonly property bool updateNeedsAttention", panel)
+        self.assertIn('"Needs reconnect, showing cached data"', panel)
         self.assertNotIn('"Synced " + String(providers[0].last_sync', panel)
 
     def test_empty_error_state_explains_the_failure_and_recovery_actions(self):

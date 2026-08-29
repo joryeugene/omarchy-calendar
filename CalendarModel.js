@@ -356,8 +356,20 @@ function providerLabel(provider) {
 
 function updateStatus(providers, now) {
   if (!providers || providers.length === 0) return "No accounts"
-  for (var i = 0; i < providers.length; i++)
-    if (providers[i].stale) return "Offline"
+  var unhealthy = []
+  var healthy = 0
+  for (var i = 0; i < providers.length; i++) {
+    if (providers[i].stale || providers[i].connected === false) unhealthy.push(providers[i])
+    else healthy++
+  }
+  if (unhealthy.length > 0) {
+    var disconnected = unhealthy.filter(function(provider) { return provider.connected === false })
+    if (disconnected.length === 1) return providerLabel(disconnected[0].provider) + " needs reconnect"
+    if (disconnected.length > 1) return "Accounts need reconnect"
+    if (healthy > 0 && unhealthy.length === 1) return providerLabel(unhealthy[0].provider) + " stale"
+    if (healthy > 0) return "Some calendars stale"
+    return "Offline, cached"
+  }
 
   var oldest = Infinity
   for (var j = 0; j < providers.length; j++) {
