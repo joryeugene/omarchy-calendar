@@ -218,7 +218,7 @@ class ReleaseLayoutTests(unittest.TestCase):
 
         self.assertEqual(association, {
             "associatedApplications": [{
-                "applicationId": "9a7f1138-b541-4840-aa23-e84297de342d",
+                "applicationId": settings_module.BUNDLED_PUBLIC_CLIENT_IDS["microsoft"],
             }],
         })
 
@@ -466,7 +466,11 @@ class ReleaseLayoutTests(unittest.TestCase):
         google_credential = settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL
 
         if "rc" in __version__:
-            self.assertEqual(bundled, {"google": "", "microsoft": ""})
+            self.assertEqual(bundled["google"], "")
+            self.assertRegex(
+                bundled["microsoft"],
+                r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+            )
             self.assertEqual(google_credential, "")
             self.assertIn("Bring your own", public_setup_copy)
             return

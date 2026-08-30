@@ -13,7 +13,7 @@ from pathlib import Path
 
 BUNDLED_PUBLIC_CLIENT_IDS = {
     "google": "",
-    "microsoft": "",
+    "microsoft": "9a7f1138-b541-4840-aa23-e84297de342d",
 }
 BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ""
 
