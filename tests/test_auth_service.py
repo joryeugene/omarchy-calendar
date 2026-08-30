@@ -20,6 +20,7 @@ from tests.test_sync import FakeHttp, FakeKeyring, FakeProvider, sample_event
 class FakeReceiver:
     redirect_uri = "http://127.0.0.1:8765/callback"
     providers = []
+    timeouts = []
 
     def __init__(self, flow, provider):
         self.flow = flow
@@ -33,12 +34,14 @@ class FakeReceiver:
         return None
 
     def wait(self, timeout=180):
+        self.timeouts.append(timeout)
         return "authorization-code"
 
 
 class AuthenticatorTests(unittest.TestCase):
     def setUp(self):
         FakeReceiver.providers.clear()
+        FakeReceiver.timeouts.clear()
 
     def test_google_auth_exchanges_pkce_stores_token_and_initial_events(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -65,6 +68,7 @@ class AuthenticatorTests(unittest.TestCase):
             self.assertEqual(result["account_id"], "a")
             self.assertIn("calendar.events.readonly", opened[0])
             self.assertEqual(FakeReceiver.providers, ["google"])
+            self.assertEqual(FakeReceiver.timeouts, [600])
             self.assertEqual(http.posts[0][0], "https://oauth2.googleapis.com/token")
             self.assertEqual(http.posts[0][1]["code_verifier"], "v" * 64)
             self.assertEqual(http.posts[0][1]["client_secret"], "desktop-credential")
