@@ -190,6 +190,13 @@ Run the complete local check:
 scripts/check
 ```
 
+Optionally enable the repository's staged secret scan:
+
+```bash
+mise install
+git config core.hooksPath .githooks
+```
+
 Before a public artifact or tag, run:
 
 ```bash
