@@ -17,7 +17,7 @@ class QmlContractTests(unittest.TestCase):
         manifest = json.loads(self.text("manifest.json"))
         bar = self.text("BarWidget.qml")
         self.assertEqual(manifest["id"], "io.github.joryeugene.omarchy-calendar")
-        self.assertEqual(manifest["version"], "1.0.0-rc.3")
+        self.assertEqual(manifest["version"], "1.0.0-rc.4")
         self.assertEqual(set(manifest["kinds"]), {"bar-widget", "service"})
         self.assertEqual(manifest["entryPoints"]["barWidget"], "BarWidget.qml")
         self.assertEqual(manifest["entryPoints"]["service"], "Service.qml")
@@ -252,6 +252,7 @@ class QmlContractTests(unittest.TestCase):
         for label in (
             "Private setup is not one-click", "Choose Google Desktop JSON",
             "WHAT FLIGHT DECK REQUESTS", "Connect in browser", "No hosted backend",
+            "Flight Deck's bundled registration is ready",
         ):
             self.assertIn(label, setup)
         self.assertIn("import QtQuick.Dialogs", setup)

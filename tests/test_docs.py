@@ -48,6 +48,7 @@ class DocumentationTests(unittest.TestCase):
             SITE / "index.html",
             SITE / "privacy" / "index.html",
             SITE / "terms" / "index.html",
+            SITE / "verification" / "index.html",
         )
         for page in pages:
             self.assertTrue(page.is_file(), page)
@@ -139,22 +140,25 @@ class DocumentationTests(unittest.TestCase):
             self.assertIn(required, policy)
         self.assertNotIn("local-first", policy)
 
-    def test_public_preview_docs_put_bring_your_own_oauth_before_installation(self):
-        install_command = (
-            "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable"
-        )
-        for path, after in (
-            (ROOT / "README.md", "## Connect Google and Outlook"),
-            (ROOT / "docs" / "INSTALL.md", "## Provider setup"),
-        ):
+    def test_candidate_docs_make_bundled_setup_primary_and_overrides_advanced(self):
+        for path in (ROOT / "README.md", ROOT / "docs" / "INSTALL.md"):
             document = path.read_text(encoding="utf-8")
-            prerequisite = document.index("## Bring your own OAuth registration")
-            self.assertLess(prerequisite, document.index("## Install"))
-            self.assertLess(prerequisite, document.index(after))
-            self.assertIn(install_command, document)
-            self.assertIn("Google Desktop OAuth app", document)
-            self.assertIn("Microsoft public desktop app", document)
-            self.assertIn("not one-click or seamless", document)
+            connect = document.index("Connect in browser")
+            advanced = document.index("Advanced provider override")
+            self.assertLess(connect, advanced)
+            self.assertIn("Google Calendar", document)
+            self.assertIn("Outlook.com", document)
+            self.assertNotIn("## Bring your own OAuth registration", document)
+            self.assertNotIn("not one-click or seamless", document)
+
+    def test_verification_page_names_the_exact_branch_without_replacing_rc3(self):
+        verification = (SITE / "verification" / "index.html").read_text(encoding="utf-8")
+        homepage = (SITE / "index.html").read_text(encoding="utf-8")
+        self.assertIn("codex/v1.0.0-rc.4-verification", verification)
+        self.assertIn("Connect in browser", verification)
+        self.assertIn("Advanced provider override", verification)
+        self.assertIn("v1.0.0-rc.3 for Omarchy", homepage)
+        self.assertNotIn("v1.0.0-rc.4", homepage)
 
     def test_install_guide_covers_security_setup_and_operations(self):
         guide = (ROOT / "docs/INSTALL.md").read_text(encoding="utf-8")
@@ -202,7 +206,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertEqual(positions, sorted(positions))
         week_image = "screenshots/flight-deck-calendar-week.png"
         today_image = "screenshots/flight-deck-calendar-today.png"
-        self.assertLess(readme.index(week_image), readme.index("## Bring your own OAuth"))
+        self.assertLess(readme.index(week_image), readme.index("## Install"))
         self.assertGreater(readme.index(today_image), readme.index("## Keyboard map"))
         self.assertLess(readme.index(today_image), readme.index("## Settings and themes"))
         self.assertIn("No hosted backend", readme)

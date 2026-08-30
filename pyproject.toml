@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flight-deck-calendar"
-version = "1.0.0rc3"
+version = "1.0.0rc4"
 description = "Keyboard-first read-only Google and Outlook calendar for Omarchy"
 readme = "README.md"
 requires-python = ">=3.11"

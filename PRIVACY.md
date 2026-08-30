@@ -20,7 +20,8 @@ Flight Deck Calendar's use and transfer of information received from Google APIs
 
 - OAuth access and refresh tokens are stored in the desktop Secret Service keyring under the `omarchy-calendar` application attribute.
 - The local SQLite cache stores account identifiers and labels; calendar identifiers, names, and colors; event titles, times, locations, descriptions, organizers, status, and meeting and source links; and provider refresh health. It is stored at `~/.local/state/omarchy-calendar/calendar.db` with private permissions.
-- Local developer builds may store public provider client IDs in `~/.config/omarchy-calendar/providers.json` with private permissions.
+- Bundled Google and Microsoft desktop registrations are public application metadata shipped with the plugin. They are not account credentials and cannot grant access without the user's browser consent and tokens.
+- Advanced provider overrides may store public provider client IDs in `~/.config/omarchy-calendar/providers.json` with private permissions. An imported Google Desktop app credential is stored in a separate Secret Service item.
 - Appearance settings remain in Omarchy's user-owned `~/.config/omarchy/shell.json`.
 
 The project does not collect, transmit, or retain calendar data on a Flight Deck server because no such server exists.
@@ -33,6 +34,6 @@ Meeting and source actions accept only HTTPS URLs already returned with an event
 
 Disconnecting Google or Outlook deletes that provider's tokens from Secret Service and removes its cached accounts and events immediately. It does not change the provider calendar.
 
-The in-app reset uses two activations: choose `Reset local data`, then choose `Confirm reset`. The terminal command `calendarctl reset-local-data` runs immediately when invoked. Both paths delete all Flight Deck provider tokens, imported Google app credentials, cached events, provider health records, and local provider client-ID overrides. They do not delete appearance settings or change Google or Microsoft data.
+The in-app reset uses two activations: choose `Reset local data`, then choose `Confirm reset`. The terminal command `calendarctl reset-local-data` runs immediately when invoked. Both paths delete all Flight Deck provider tokens, imported Google app credentials, cached events, provider health records, and local provider client-ID overrides. They do not delete bundled public registration metadata, appearance settings, or Google or Microsoft data.
 
 Uninstalling the plugin alone does not delete data. Run `calendarctl reset-local-data` first when full local removal is wanted.
