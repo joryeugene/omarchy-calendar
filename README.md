@@ -2,6 +2,8 @@
 
 Flight Deck Calendar is a keyboard-first, read-only Google and Outlook calendar cockpit. No hosted backend. Tokens stay in the system keyring. Calendar data stays local.
 
+See the product overview at [calendar.pestorious.com](https://calendar.pestorious.com/) and read the [privacy policy](https://calendar.pestorious.com/privacy/).
+
 ![Flight Deck Calendar Week view with fictional Google and Outlook events, an all-day lane, overlapping meetings, and current-time context](screenshots/flight-deck-calendar-week.png)
 
 The Week view shows the promise in one glance: Google and Outlook together in a spatial time grid, with all-day events, overlapping meetings, current-time context, and keyboard navigation. Today turns the same local calendar into a focused agenda with persistent event details and one-key meeting actions.
