@@ -26,7 +26,7 @@ Invited RC4 testers should use the exact verification branch in a clean profile:
 
 ```bash
 plugin="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar"
-git clone --branch codex/v1.0.0-rc.4-verification --single-branch \
+git clone --branch v1.0.0-rc.4-verification --single-branch \
   https://github.com/joryeugene/omarchy-calendar.git "$plugin"
 omarchy plugin enable io.github.joryeugene.omarchy-calendar --section right
 ```

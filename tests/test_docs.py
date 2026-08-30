@@ -154,7 +154,8 @@ class DocumentationTests(unittest.TestCase):
     def test_verification_page_names_the_exact_branch_without_replacing_rc3(self):
         verification = (SITE / "verification" / "index.html").read_text(encoding="utf-8")
         homepage = (SITE / "index.html").read_text(encoding="utf-8")
-        self.assertIn("codex/v1.0.0-rc.4-verification", verification)
+        self.assertIn("v1.0.0-rc.4-verification", verification)
+        self.assertNotIn("codex" + "/", verification)
         self.assertIn("Connect in browser", verification)
         self.assertIn("Advanced provider override", verification)
         self.assertIn("v1.0.0-rc.3 for Omarchy", homepage)
