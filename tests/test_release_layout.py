@@ -156,13 +156,15 @@ class ReleaseLayoutTests(unittest.TestCase):
         credential = "GOC" + "SPX-" + ("Ab1_" * 4)
         settings = release_root / "src" / "omarchy_calendar" / "settings.py"
         source = settings.read_text(encoding="utf-8")
-        before = 'BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ""'
         after = f'BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = "{credential}"'
-        if before not in source:
-            insertion = "\n\ndef default_settings_path"
-            self.assertIn(insertion, source)
-            source = source.replace(insertion, f"\n\n{before}{insertion}", 1)
-        settings.write_text(source.replace(before, after, 1), encoding="utf-8")
+        source, replacements = re.subn(
+            r'(?m)^BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ".*"$',
+            after,
+            source,
+            count=1,
+        )
+        self.assertEqual(replacements, 1)
+        settings.write_text(source, encoding="utf-8")
         if duplicate_path is not None:
             duplicate = release_root / duplicate_path
             duplicate.write_text(
@@ -466,16 +468,22 @@ class ReleaseLayoutTests(unittest.TestCase):
         google_credential = settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL
 
         if "rc" in __version__:
-            self.assertEqual(bundled["google"], "")
+            self.assertRegex(
+                bundled["google"],
+                r"^[A-Za-z0-9._-]+\.apps\.googleusercontent\.com$",
+            )
             self.assertRegex(
                 bundled["microsoft"],
                 r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
             )
-            self.assertEqual(google_credential, "")
+            self.assertTrue(google_credential.startswith("GOCSPX-"))
             self.assertIn("Bring your own", public_setup_copy)
             return
 
-        self.assertRegex(bundled["google"], r"^[0-9-]+\.apps\.googleusercontent\.com$")
+        self.assertRegex(
+            bundled["google"],
+            r"^[A-Za-z0-9._-]+\.apps\.googleusercontent\.com$",
+        )
         self.assertRegex(
             bundled["microsoft"],
             r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",

@@ -158,7 +158,7 @@ class SyncEngineTests(unittest.TestCase):
         self.assertEqual(http.posts[0][1]["client_secret"], "desktop-credential")
         self.assertEqual(keyring.puts[-1][2]["refresh_token"], "refresh")
 
-    def test_expired_google_token_refreshes_with_the_bundled_registration_pair(self):
+    def test_expired_google_token_refreshes_with_bundled_registration_metadata(self):
         class NoLocalCredentialKeyring(FakeKeyring):
             def get_app_credential(self, _provider):
                 raise AssertionError("bundled refresh must not read a local app credential")

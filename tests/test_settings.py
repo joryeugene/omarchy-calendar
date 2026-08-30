@@ -11,12 +11,12 @@ from omarchy_calendar.settings import ProviderSettings
 
 
 class ProviderSettingsTests(unittest.TestCase):
-    def test_production_microsoft_registration_is_bundled_while_google_waits(self):
+    def test_production_provider_registrations_are_bundled(self):
         self.assertEqual(settings_module.BUNDLED_PUBLIC_CLIENT_IDS, {
-            "google": "",
+            "google": "896234184831-u46of50eqfm2plsrf8faqr1cabvacrk9.apps.googleusercontent.com",
             "microsoft": "9a7f1138-b541-4840-aa23-e84297de342d",
         })
-        self.assertEqual(settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL, "")
+        self.assertTrue(settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL)
 
     def test_loads_only_public_client_identifiers(self):
         with tempfile.TemporaryDirectory() as temporary:

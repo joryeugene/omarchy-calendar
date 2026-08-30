@@ -74,7 +74,7 @@ class AuthenticatorTests(unittest.TestCase):
             self.assertFalse(view["demo"])
             store.close()
 
-    def test_bundled_google_auth_uses_its_paired_credential_and_read_only_scopes(self):
+    def test_bundled_google_auth_uses_public_desktop_metadata_and_read_only_scopes(self):
         class NoLocalCredentialKeyring(FakeKeyring):
             def get_app_credential(self, _provider):
                 raise AssertionError("bundled auth must not read a local app credential")
@@ -120,7 +120,7 @@ class AuthenticatorTests(unittest.TestCase):
             )
             store.close()
 
-    def test_local_google_auth_never_mixes_with_bundled_credential(self):
+    def test_local_google_auth_never_mixes_with_bundled_metadata(self):
         with tempfile.TemporaryDirectory() as temporary, patch.multiple(
             settings_module,
             BUNDLED_PUBLIC_CLIENT_IDS={

@@ -129,6 +129,23 @@ def setup_status(
     }
 
 
+def disconnect_provider(
+    store: CalendarStore,
+    keyring: SecretServiceStore,
+    provider: str,
+    account_id: str | None = None,
+) -> dict[str, object]:
+    accounts = store.accounts(provider)
+    if account_id:
+        accounts = [item for item in accounts if item["account_id"] == account_id]
+    removed = 0
+    for account in accounts:
+        account = str(account["account_id"])
+        keyring.clear(provider, account)
+        removed += store.remove_account(provider, account)
+    return {"provider": provider, "disconnected": removed}
+
+
 def reset_local_data(
     store: CalendarStore,
     keyring: SecretServiceStore,
@@ -221,15 +238,12 @@ def main(argv: list[str] | None = None) -> int:
                 emit(SyncEngine(store).sync(arguments.provider))
                 return 0
             if arguments.command == "disconnect":
-                keyring = SecretServiceStore()
-                accounts = store.accounts(arguments.provider)
-                if arguments.account:
-                    accounts = [item for item in accounts if item["account_id"] == arguments.account]
-                removed = 0
-                for account in accounts:
-                    keyring.clear(arguments.provider, str(account["account_id"]))
-                    removed += store.remove_account(arguments.provider, str(account["account_id"]))
-                emit({"provider": arguments.provider, "disconnected": removed})
+                emit(disconnect_provider(
+                    store,
+                    SecretServiceStore(),
+                    arguments.provider,
+                    arguments.account,
+                ))
                 return 0
             if arguments.command == "reset-local-data":
                 emit(reset_local_data(store, SecretServiceStore()))

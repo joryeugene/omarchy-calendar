@@ -12,10 +12,13 @@ from pathlib import Path
 
 
 BUNDLED_PUBLIC_CLIENT_IDS = {
-    "google": "",
+    "google": "896234184831-u46of50eqfm2plsrf8faqr1cabvacrk9.apps.googleusercontent.com",
     "microsoft": "9a7f1138-b541-4840-aa23-e84297de342d",
 }
-BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = ""
+# Google names this field a client secret, but a native desktop app cannot keep it
+# confidential. The production token endpoint requires it, so it is bundled only
+# as public registration metadata. User OAuth tokens remain in Secret Service.
+BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL = "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"
 
 
 def default_settings_path() -> Path:
