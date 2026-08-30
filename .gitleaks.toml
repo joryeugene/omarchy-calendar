@@ -1,0 +1,15 @@
+title = "omarchy-calendar"
+minVersion = "8.30.1"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+
+[[rules.allowlists]]
+description = "A historical native Google OAuth registration contained public desktop-client metadata."
+condition = "AND"
+regexTarget = "line"
+paths = ['''^src/omarchy_calendar/settings\.py$''']
+regexes = ['''BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL\s*=\s*"[^"\r\n]+"''']
