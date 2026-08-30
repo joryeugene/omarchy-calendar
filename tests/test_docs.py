@@ -24,6 +24,25 @@ class LinkParser(HTMLParser):
 
 
 class DocumentationTests(unittest.TestCase):
+    def test_static_site_leads_with_the_product_without_marketing_scaffolding(self):
+        homepage = (SITE / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("Google Calendar and Outlook for the Omarchy bar.", homepage)
+        self.assertIn('class="product-frame hero-product"', homepage)
+        self.assertIn('class="product-spec"', homepage)
+        self.assertEqual(homepage.count('class="spec-item"'), 4)
+        self.assertNotIn('class="trust-grid"', homepage)
+        self.assertNotIn('class="boundary', homepage)
+        self.assertNotIn('class="frame-bar"', homepage)
+        self.assertNotIn('class="card-index"', homepage)
+        self.assertNotIn("fictional", homepage.lower())
+        self.assertNotIn("A deliberate boundary", homepage)
+        self.assertNotIn(">Workflow<", homepage)
+        self.assertNotIn(">Safety<", homepage)
+
+        for path in (SITE / "index.html", SITE / "privacy" / "index.html", SITE / "terms" / "index.html"):
+            self.assertNotIn('class="brand-mark"', path.read_text(encoding="utf-8"))
+
     def test_static_site_local_navigation_resolves_from_each_public_page(self):
         pages = (
             SITE / "index.html",
