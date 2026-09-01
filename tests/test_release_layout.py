@@ -141,7 +141,7 @@ class ReleaseLayoutTests(unittest.TestCase):
             ROOT,
             release_root,
             ignore=shutil.ignore_patterns(
-                ".git", ".private", ".superpowers", "__pycache__", "*.pyc"
+                ".ai", ".git", ".private", ".superpowers", "__pycache__", "*.pyc"
             ),
         )
         for test_module in (release_root / "tests").glob("test_*.py"):

@@ -58,7 +58,7 @@ failures: list[str] = []
 tracked_files = set(
     subprocess.check_output(["git", "ls-files", "-z"], cwd=root, text=True).split("\0")
 )
-internal_directories = {".private", ".superpowers"}
+internal_directories = {".ai", ".private", ".superpowers"}
 
 
 def scan_path(path: Path) -> bool:

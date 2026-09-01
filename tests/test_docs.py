@@ -128,17 +128,42 @@ class DocumentationTests(unittest.TestCase):
     def test_repository_privacy_policy_matches_public_data_disclosures(self):
         policy = (ROOT / "PRIVACY.md").read_text(encoding="utf-8")
         for required in (
+            "## Google user data we access",
+            "## How we use Google user data",
+            "## Sharing and disclosure",
+            "## Data protection",
+            "## Retention and deletion",
             "uses Google Calendar data only to display",
             "does not sell, share, or transfer Google user data",
+            "does not integrate with AI services",
             "cannot access calendar data or tokens",
             "Google API Services User Data Policy, including the Limited Use requirements",
             "account identifiers and labels; calendar identifiers, names, and colors",
             "event titles, times, locations, descriptions, organizers, status, and meeting and source links",
+            "Secret Service keyring",
+            "private file permissions",
+            "retains Google OAuth tokens until",
+            "retains cached Google Calendar data until",
             "choose `Reset local data`, then choose `Confirm reset`",
             "calendarctl reset-local-data` runs immediately when invoked",
         ):
             self.assertIn(required, policy)
         self.assertNotIn("local-first", policy)
+
+    def test_public_privacy_policy_has_explicit_google_disclosures(self):
+        privacy = (SITE / "privacy" / "index.html").read_text(encoding="utf-8")
+        for required in (
+            "Google user data we access",
+            "How we use Google user data",
+            "Sharing and disclosure",
+            "Data protection",
+            "Retention and deletion",
+            "does not integrate with AI services",
+            "private file permissions",
+            "retains Google OAuth tokens until",
+            "retains cached Google Calendar data until",
+        ):
+            self.assertIn(required, privacy)
 
     def test_candidate_docs_make_bundled_setup_primary_and_overrides_advanced(self):
         for path in (ROOT / "README.md", ROOT / "docs" / "INSTALL.md"):
