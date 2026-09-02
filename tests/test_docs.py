@@ -1,30 +1,212 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 import json
 import unittest
+from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 
 ROOT = Path(__file__).parents[1]
 GUIDE_DATA = ROOT / "docs" / "shortcuts.json"
+SITE = ROOT / "site"
+
+
+class LinkParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.targets = []
+        self.ids = set()
+
+    def handle_starttag(self, tag, attributes):
+        attribute_name = "src" if tag == "img" else "href" if tag in {"a", "link"} else ""
+        values = dict(attributes)
+        if values.get("id"):
+            self.ids.add(values["id"])
+        if attribute_name and values.get(attribute_name):
+            self.targets.append(values[attribute_name])
 
 
 class DocumentationTests(unittest.TestCase):
-    def test_public_preview_docs_put_bring_your_own_oauth_before_installation(self):
-        install_command = (
-            "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable"
+    def test_static_site_leads_with_the_product_without_marketing_scaffolding(self):
+        homepage = (SITE / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("Google Calendar and Outlook for the Omarchy bar.", homepage)
+        self.assertIn('class="product-frame hero-product"', homepage)
+        self.assertIn('class="product-spec"', homepage)
+        self.assertEqual(homepage.count('class="spec-item"'), 4)
+        self.assertNotIn('class="trust-grid"', homepage)
+        self.assertNotIn('class="boundary', homepage)
+        self.assertNotIn('class="frame-bar"', homepage)
+        self.assertNotIn('class="card-index"', homepage)
+        self.assertNotIn("fictional", homepage.lower())
+        self.assertNotIn("A deliberate boundary", homepage)
+        self.assertNotIn(">Workflow<", homepage)
+        self.assertNotIn(">Safety<", homepage)
+
+        for path in (SITE / "index.html", SITE / "privacy" / "index.html", SITE / "terms" / "index.html"):
+            self.assertNotIn('class="brand-mark"', path.read_text(encoding="utf-8"))
+
+    def test_static_site_local_navigation_resolves_from_each_public_page(self):
+        pages = (
+            SITE / "index.html",
+            SITE / "privacy" / "index.html",
+            SITE / "terms" / "index.html",
         )
-        for path, after in (
-            (ROOT / "README.md", "## Connect Google and Outlook"),
-            (ROOT / "docs" / "INSTALL.md", "## Provider setup"),
+        for page in pages:
+            self.assertTrue(page.is_file(), page)
+            parser = LinkParser()
+            parser.feed(page.read_text(encoding="utf-8"))
+            for target in parser.targets:
+                parsed = urlsplit(target)
+                if parsed.scheme or parsed.netloc:
+                    continue
+                self.assertFalse(parsed.path.startswith("/"), (page, target))
+                resolved = page if not parsed.path else (page.parent / unquote(parsed.path)).resolve()
+                self.assertTrue(resolved.is_relative_to(SITE.resolve()), (page, target))
+                if resolved.is_dir():
+                    resolved /= "index.html"
+                self.assertTrue(resolved.is_file(), (page, target))
+                if parsed.fragment:
+                    destination = LinkParser()
+                    destination.feed(resolved.read_text(encoding="utf-8"))
+                    self.assertIn(unquote(parsed.fragment), destination.ids, (page, target))
+
+    def test_static_site_explains_stable_access_storage_and_deletion_behavior(self):
+        homepage_path = SITE / "index.html"
+        privacy_path = SITE / "privacy" / "index.html"
+        terms_path = SITE / "terms" / "index.html"
+        self.assertTrue(homepage_path.is_file(), homepage_path)
+        self.assertTrue(privacy_path.is_file(), privacy_path)
+        self.assertTrue(terms_path.is_file(), terms_path)
+        homepage = homepage_path.read_text(encoding="utf-8")
+        privacy = privacy_path.read_text(encoding="utf-8")
+        terms = terms_path.read_text(encoding="utf-8")
+        public_copy = homepage + privacy + terms
+
+        for required in (
+            "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable",
+            "Connect each account in the browser",
+            "You do not need a Google Cloud or Microsoft Entra project",
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
+            "https://www.googleapis.com/auth/calendar.events.readonly",
+            "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
+            "openid",
+            "email",
+            "profile",
+            "offline_access",
+            "User.Read",
+            "Calendars.Read",
+            "Secret Service",
+            "~/.local/state/omarchy-calendar/calendar.db",
+            "account identifiers and labels, calendar identifiers, names, and colors",
+            "event titles, times, locations, descriptions, organizers, status, and meeting and source links",
+            "last successful local cache",
+            "marked stale",
+            "Disconnecting Google or Outlook deletes",
+            "calendarctl reset-local-data",
+            "in-app flow uses two activations",
+            "choose Reset local data, then choose Confirm reset",
+            "terminal command",
+            "runs immediately when invoked",
+            "Uninstalling the plugin alone does not delete data",
+            "uses Google Calendar data only to display",
+            "does not sell, share, or transfer Google user data",
+            "cannot access your calendar data or tokens",
+            "Google API Services User Data Policy, including the Limited Use requirements",
+            "GNU General Public License version 3 or later",
+            "do not replace or limit the GPL",
         ):
+            self.assertIn(required, public_copy)
+        self.assertIn('href="privacy/"', homepage)
+        self.assertIn('href="terms/"', homepage)
+        for forbidden in (
+            "Calendars.ReadWrite",
+            "https://www.googleapis.com/auth/calendar</code>",
+            "https://www.googleapis.com/auth/calendar.events</code>",
+            "one-click account setup",
+            "requires two confirmations",
+            "focused desktop workflow",
+            "local-first",
+            "public preview",
+            "verification candidate",
+            "one-click",
+            "seamless",
+            "fictional",
+        ):
+            self.assertNotIn(forbidden, public_copy)
+
+    def test_repository_privacy_policy_matches_public_data_disclosures(self):
+        policy = (ROOT / "PRIVACY.md").read_text(encoding="utf-8")
+        for required in (
+            "## Google user data we access",
+            "## How we use Google user data",
+            "## Sharing and disclosure",
+            "## Data protection",
+            "## Retention and deletion",
+            "uses Google Calendar data only to display",
+            "does not sell, share, or transfer Google user data",
+            "does not integrate with AI services",
+            "cannot access calendar data or tokens",
+            "Google API Services User Data Policy, including the Limited Use requirements",
+            "account identifiers and labels; calendar identifiers, names, and colors",
+            "event titles, times, locations, descriptions, organizers, status, and meeting and source links",
+            "Secret Service keyring",
+            "private file permissions",
+            "retains Google OAuth tokens until",
+            "retains cached Google Calendar data until",
+            "choose `Reset local data`, then choose `Confirm reset`",
+            "calendarctl reset-local-data` runs immediately when invoked",
+        ):
+            self.assertIn(required, policy)
+        self.assertNotIn("local-first", policy)
+
+    def test_public_privacy_policy_has_explicit_google_disclosures(self):
+        privacy = (SITE / "privacy" / "index.html").read_text(encoding="utf-8")
+        for required in (
+            "Google user data we access",
+            "How we use Google user data",
+            "Sharing and disclosure",
+            "Data protection",
+            "Retention and deletion",
+            "does not integrate with AI services",
+            "private file permissions",
+            "retains Google OAuth tokens until",
+            "retains cached Google Calendar data until",
+        ):
+            self.assertIn(required, privacy)
+
+    def test_stable_docs_make_bundled_setup_primary_and_overrides_advanced(self):
+        for path in (ROOT / "README.md", ROOT / "docs" / "INSTALL.md"):
             document = path.read_text(encoding="utf-8")
-            prerequisite = document.index("## Bring your own OAuth registration")
-            self.assertLess(prerequisite, document.index("## Install"))
-            self.assertLess(prerequisite, document.index(after))
-            self.assertIn(install_command, document)
-            self.assertIn("Google Desktop OAuth app", document)
-            self.assertIn("Microsoft public desktop app", document)
-            self.assertIn("not one-click or seamless", document)
+            self.assertIn(
+                "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+                document,
+            )
+            connect = document.index("Connect in browser")
+            advanced = document.index("Advanced provider override")
+            self.assertLess(connect, advanced)
+            self.assertIn("Google Calendar", document)
+            self.assertIn("Outlook.com", document)
+            self.assertNotIn("## Bring your own OAuth registration", document)
+            self.assertNotIn("not one-click or seamless", document)
+            self.assertNotIn("RC3", document)
+            self.assertNotIn("RC4", document)
+            self.assertNotIn("verification candidate", document)
+
+    def test_stable_site_removes_verification_candidate_and_marks_v1(self):
+        homepage = (SITE / "index.html").read_text(encoding="utf-8")
+        self.assertFalse((SITE / "verification" / "index.html").exists())
+        self.assertIn("v1.0.0 for Omarchy", homepage)
+        self.assertIn(
+            "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+            homepage,
+        )
+        self.assertIn(
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
+            homepage,
+        )
+        self.assertNotIn("rc.3", homepage.lower())
+        self.assertNotIn("rc.4", homepage.lower())
 
     def test_install_guide_covers_security_setup_and_operations(self):
         guide = (ROOT / "docs/INSTALL.md").read_text(encoding="utf-8")
@@ -44,8 +226,10 @@ class DocumentationTests(unittest.TestCase):
             "omarchy plugin add",
             "io.github.joryeugene.omarchy-calendar",
             "Super+Shift+C",
+            'o.bind("SUPER + SHIFT + C", "Flight Deck calendar", "omarchy-shell shell toggle io.github.joryeugene.omarchy-calendar")',
         ):
             self.assertIn(required, guide)
+        self.assertNotIn("bindd =", guide)
         for retired in (
             "scripts/install",
             "scripts/rollback",
@@ -72,11 +256,27 @@ class DocumentationTests(unittest.TestCase):
         self.assertEqual(positions, sorted(positions))
         week_image = "screenshots/flight-deck-calendar-week.png"
         today_image = "screenshots/flight-deck-calendar-today.png"
-        self.assertLess(readme.index(week_image), readme.index("## Bring your own OAuth"))
+        self.assertLess(readme.index(week_image), readme.index("## Install"))
         self.assertGreater(readme.index(today_image), readme.index("## Keyboard map"))
         self.assertLess(readme.index(today_image), readme.index("## Settings and themes"))
         self.assertIn("No hosted backend", readme)
-        self.assertIn("public preview", readme)
+        self.assertIn(
+            "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+            readme,
+        )
+        self.assertIn(
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
+            readme,
+        )
+        for forbidden in (
+            "public preview",
+            "verification candidate",
+            "fictional",
+            "one-click",
+            "seamless",
+            "local-first",
+        ):
+            self.assertNotIn(forbidden, readme.lower())
         self.assertNotIn("private local installation", readme)
         self.assertNotIn("rollback flow", readme)
         for key in (

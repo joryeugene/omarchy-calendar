@@ -15,8 +15,10 @@ class KeyringError(RuntimeError):
 _SECRET_KEYS = ("access_token", "refresh_token", "id_token", "client_secret", "code")
 
 
-def redact(text: str) -> str:
+def redact(text: str, sensitive_values: tuple[str, ...] = ()) -> str:
     cleaned = str(text)
+    for value in sorted({str(item) for item in sensitive_values if str(item)}, key=len, reverse=True):
+        cleaned = cleaned.replace(value, "[redacted]")
     for key in _SECRET_KEYS:
         cleaned = re.sub(
             rf"(?i)([\"']?{re.escape(key)}[\"']?\s*[:=]\s*[\"']?)([^\s&;,\"'}}]+)",
@@ -85,7 +87,9 @@ class SecretServiceStore:
         ]
         result = self._run(argv, input=value)
         if result.returncode != 0:
-            raise KeyringError(redact(result.stderr or "Secret Service store failed"))
+            raise KeyringError(
+                redact(result.stderr or "Secret Service store failed", (value,))
+            )
 
     def get_app_credential(self, provider: str) -> str:
         argv = ["secret-tool", "lookup", *self._app_credential_attributes(provider)]

@@ -94,9 +94,10 @@ class SyncEngine:
             "grant_type": "refresh_token",
         }
         if provider == "google":
-            app_credential = self.keyring.get_app_credential(provider)
-            if app_credential:
-                form["client_secret"] = app_credential
+            app_credential = self.settings.google_app_credential(self.keyring)
+            if not app_credential:
+                raise HttpError(401, "Google Desktop credentials are not configured")
+            form["client_secret"] = app_credential
         response = self.http.post_token(TOKEN_ENDPOINTS[provider], form)
         merged = dict(token)
         merged.update(response)
