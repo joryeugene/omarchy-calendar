@@ -226,8 +226,10 @@ class DocumentationTests(unittest.TestCase):
             "omarchy plugin add",
             "io.github.joryeugene.omarchy-calendar",
             "Super+Shift+C",
+            'o.bind("SUPER + SHIFT + C", "Flight Deck calendar", "omarchy-shell shell toggle io.github.joryeugene.omarchy-calendar")',
         ):
             self.assertIn(required, guide)
+        self.assertNotIn("bindd =", guide)
         for retired in (
             "scripts/install",
             "scripts/rollback",

@@ -24,10 +24,10 @@ Try the built-in offline dataset without an account:
 
 ## Optional launch binding
 
-`Super+Shift+C` is optional and the plugin does not claim it during installation. If the chord is free on the machine, add this user-owned binding to the normal Omarchy Hyprland bindings file:
+`Super+Shift+C` is optional and the plugin does not claim it during installation. If the chord is free on the machine, add this user-owned binding to `~/.config/hypr/bindings.lua`:
 
-```ini
-bindd = SUPER SHIFT, C, Flight Deck calendar, exec, omarchy-shell shell toggle io.github.joryeugene.omarchy-calendar
+```lua
+o.bind("SUPER + SHIFT + C", "Flight Deck calendar", "omarchy-shell shell toggle io.github.joryeugene.omarchy-calendar")
 ```
 
 Reload Hyprland and confirm `hyprctl configerrors` is empty. Remove the single line to roll back the binding.
