@@ -1,6 +1,6 @@
 # Flight Deck Calendar for Omarchy
 
-Flight Deck Calendar is a keyboard-first, read-only Google and Outlook calendar cockpit. No hosted backend. Tokens stay in the system keyring. Calendar data stays local.
+Flight Deck Calendar is a keyboard-first, read-only Google and Outlook calendar cockpit. No hosted backend receives calendar data. Tokens stay in the system keyring, and calendar data stays on the workstation.
 
 See the product overview at [calendar.pestorious.com](https://calendar.pestorious.com/) and read the [privacy policy](https://calendar.pestorious.com/privacy/).
 
@@ -8,17 +8,13 @@ See the product overview at [calendar.pestorious.com](https://calendar.pestoriou
 
 The Week view shows the promise in one glance: Google and Outlook together in a spatial time grid, with all-day events, overlapping meetings, current-time context, and keyboard navigation. Today turns the same local calendar into a focused agenda with persistent event details and one-key meeting actions.
 
-## Bring your own OAuth registration
-
-Flight Deck Calendar is a public preview. It does not include Google or Microsoft OAuth registrations. Before installing or connecting a provider, create your own Google Desktop OAuth app and Microsoft public desktop app that supports personal accounts. Each registration must use only the required read-only scopes.
-
-Provider setup needs one browser consent session per provider. This preview is not one-click or seamless account setup.
+This branch contains the v1 account-setup verification candidate. The supported public preview remains RC3 on `main` until provider verification and external installation testing are complete.
 
 ## Install
 
 Requirements: current Omarchy with shell plugins, Python 3.11 or newer, Node.js for development checks, and `secret-tool` for provider tokens.
 
-Install the public preview from GitHub:
+The public install command continues to install RC3 from `main`:
 
 ```bash
 omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable
@@ -26,7 +22,16 @@ omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable
 
 The plugin manager clones the self-contained plugin. It does not install a user systemd timer, copy a helper into `~/.local/bin`, or edit Hyprland.
 
-To try fictional data before connecting an account:
+Invited RC4 testers should use the exact verification branch in a clean profile:
+
+```bash
+plugin="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar"
+git clone --branch v1.0.0-rc.4-verification --single-branch \
+  https://github.com/joryeugene/omarchy-calendar.git "$plugin"
+omarchy plugin enable io.github.joryeugene.omarchy-calendar --section right
+```
+
+To try the built-in offline dataset before connecting an account:
 
 ```bash
 ~/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar/calendarctl demo seed
@@ -36,23 +41,29 @@ To try fictional data before connecting an account:
 
 ## Connect Google and Outlook
 
-After completing the bring-your-own registration prerequisite, configure each provider and complete browser consent.
+Press `c`, choose Google Calendar or Outlook.com, review the requested read-only access, and choose **Connect in browser**. Complete provider consent in the browser, then return to Flight Deck. A successful first sync populates Today and Week.
 
-For Google, download the JSON for a Google OAuth Desktop app. Press `c`, choose Google Calendar, choose **Google Desktop JSON**, and select that file. Flight Deck imports it and opens browser authorization. The equivalent command-line fallback is:
+Google requests identity plus `calendar.events.readonly` and `calendar.calendarlist.readonly`. Personal Outlook.com uses Microsoft `/consumers` and requests identity, profile, offline access, `User.Read`, and `Calendars.Read`. There are no write scopes or calendar mutation commands.
+
+### Advanced provider override
+
+Contributors can replace either bundled public desktop registration without changing source code. A valid local override always takes precedence, and installing RC4 does not replace existing tokens or provider settings.
+
+For Google, import the Desktop credentials JSON from a separate Google Cloud project:
 
 ```bash
 calendarctl import-google-desktop-app /path/to/google-desktop-credentials.json
 calendarctl auth google
 ```
 
-The import stores the Google client ID in local provider settings and the Desktop app credential in Secret Service. It never writes the credential to the repository or dotfiles. For Microsoft, press `c`, choose Outlook.com, paste the public Application client ID from a personal-account capable desktop registration, and choose **Save ID and connect**. The equivalent command-line fallback is:
+The import stores the Google client ID in local provider settings and the Desktop app credential in Secret Service. It never writes the credential to the repository or dotfiles. For Microsoft, configure the public Application client ID from a personal-account capable desktop registration:
 
 ```bash
 calendarctl configure-client microsoft PUBLIC_MICROSOFT_DESKTOP_ID
 calendarctl auth microsoft
 ```
 
-After metadata is configured, Flight Deck can reconnect through the browser without asking for it again. Google requests identity plus `calendar.events.readonly` and `calendar.calendarlist.readonly`. Personal Outlook.com uses Microsoft `/consumers` and requests identity, profile, offline access, `User.Read`, and `Calendars.Read`. There are no write scopes or mutation commands. See [the installation guide](docs/INSTALL.md) for the exact flow.
+After an override is configured, connect through the same browser flow. See [the installation guide](docs/INSTALL.md) for the exact setup and removal behavior.
 
 ## Keyboard map
 
@@ -77,9 +88,9 @@ No shortcut requires Alt or number keys.
 
 ## Today focus and meeting actions
 
-![Flight Deck Calendar Today view with a fictional Customer demo selected, marked as a video call, and its one-key Join meeting action active](screenshots/flight-deck-calendar-today.png)
+![Flight Deck Calendar Today view with a Customer demo selected, marked as a video call, and its one-key Join meeting action active](screenshots/flight-deck-calendar-today.png)
 
-The selected fictional video call demonstrates persistent event details and the same safe meeting-link opener used by live Google and Outlook events.
+The selected video call demonstrates persistent event details and the same safe meeting-link opener used by live Google and Outlook events.
 
 ## Settings and themes
 
@@ -142,14 +153,15 @@ Example:
 ## Storage and privacy
 
 - OAuth tokens: Secret Service system keyring
-- Google Desktop app credential: distinct Secret Service keyring item
+- Bundled provider registrations: public desktop application metadata shipped with the plugin
+- Imported Google Desktop app credential for an advanced override: distinct Secret Service keyring item
 - Calendar cache: `~/.local/state/omarchy-calendar/calendar.db`, mode `0600`
 - Calendar visibility: opaque local selector keys in the Omarchy inline settings; names and account IDs remain in the local cache
 - Optional local developer client IDs: `~/.config/omarchy-calendar/providers.json`, mode `0600`
 - Telemetry, analytics, AI, and hosted backend: none
 - Calendar writes: none
 
-Disconnect removes that provider's tokens and cached events immediately. `Reset local data` uses two-step confirmation and removes every provider token, cached event, health record, and local provider override while preserving appearance settings. Read [PRIVACY.md](PRIVACY.md) for the complete lifecycle.
+Disconnect removes that provider's tokens and cached events immediately. `Reset local data` uses two-step confirmation and removes every provider token, cached event, health record, and local provider override while preserving appearance settings. Bundled public registration metadata remains part of the installed plugin. Read [PRIVACY.md](PRIVACY.md) for the complete lifecycle.
 
 ## Troubleshooting
 
@@ -203,4 +215,4 @@ Before a public artifact or tag, run:
 scripts/check --release
 ```
 
-Flight Deck Calendar is licensed under GPL-3.0-or-later. Contributions should retain SPDX headers and the read-only, local-first invariants.
+Flight Deck Calendar is licensed under GPL-3.0-or-later. Contributions should retain SPDX headers and the read-only, local-storage constraints.

@@ -77,6 +77,22 @@ class SecretServiceTests(unittest.TestCase):
         self.assertNotIn("ddd", cleaned)
         self.assertIn("[redacted]", cleaned)
 
+    def test_app_credential_store_error_redacts_the_imported_value(self):
+        imported_credential = "user-imported-desktop-credential"
+
+        def runner(_argv, **_kwargs):
+            return subprocess.CompletedProcess(
+                [], 2, stdout="", stderr=f"store rejected {imported_credential}"
+            )
+
+        with self.assertRaises(KeyringError) as caught:
+            SecretServiceStore(runner).put_app_credential(
+                "google", imported_credential
+            )
+
+        self.assertNotIn(imported_credential, str(caught.exception))
+        self.assertIn("[redacted]", str(caught.exception))
+
     def test_provider_and_full_reset_clear_only_calendar_items(self):
         runner = FakeRunner([
             subprocess.CompletedProcess([], 0, "", ""),

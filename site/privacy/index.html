@@ -1,0 +1,111 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Flight Deck Calendar explains exactly how it accesses, uses, protects, retains, and deletes Google Calendar data.">
+  <title>Privacy | Flight Deck Calendar</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="Flight Deck Calendar home"><span>Flight Deck Calendar</span></a>
+    <nav aria-label="Primary navigation">
+      <a href="../#install">Install</a>
+      <a href="./" aria-current="page">Privacy</a>
+      <a href="../terms/">Terms</a>
+      <a href="https://github.com/joryeugene/omarchy-calendar">Source</a>
+    </nav>
+  </header>
+
+  <main id="main" class="privacy-main">
+    <header class="privacy-hero shell">
+      <p class="eyebrow"><span aria-hidden="true"></span> Privacy and provider access</p>
+      <h1>Calendar data stays on your workstation.</h1>
+      <p class="lede">Flight Deck Calendar has no hosted backend, telemetry, analytics, advertising, or AI integration. The app reads provider calendars and keeps the working copy local.</p>
+      <p class="policy-meta">Effective August 31, 2026.</p>
+    </header>
+
+    <div class="privacy-layout shell">
+      <nav class="privacy-nav" aria-label="Privacy page sections">
+        <p>On this page</p>
+        <a href="#google-data">Google user data we access</a>
+        <a href="#data-use">How we use Google user data</a>
+        <a href="#sharing">Sharing and disclosure</a>
+        <a href="#protection">Data protection</a>
+        <a href="#retention">Retention and deletion</a>
+        <a href="#website">This website</a>
+      </nav>
+
+      <div class="privacy-content">
+        <section id="google-data" aria-labelledby="google-data-title">
+          <p class="eyebrow">01 / Data accessed</p>
+          <h2 id="google-data-title">Google user data we access</h2>
+          <p>Google authorization requests <code>openid</code>, <code>email</code>, <code>https://www.googleapis.com/auth/calendar.events.readonly</code>, and <code>https://www.googleapis.com/auth/calendar.calendarlist.readonly</code>. It also requests offline access so the local service can refresh in the background.</p>
+          <p>The identity scopes provide the Google account identifier and email address used to label the connected account. The calendar-list scope provides calendar identifiers, names, colors, selection state, and deletion state. The events scope provides event identifiers, titles, times, all-day status, location, description, organizer, event status, meeting links, source links, and update times.</p>
+          <p>Personal Outlook.com authorization uses Microsoft&apos;s <code>/consumers</code> authority and requests <code>openid</code>, <code>profile</code>, <code>offline_access</code>, <code>User.Read</code>, and <code>Calendars.Read</code>.</p>
+          <p>Flight Deck requests no calendar write scope and provides no route for event creation, editing, deletion, invitations, or scheduling.</p>
+        </section>
+
+        <section id="data-use" aria-labelledby="data-use-title">
+          <p class="eyebrow">02 / Data use</p>
+          <h2 id="data-use-title">How we use Google user data</h2>
+          <p>Flight Deck uses Google Calendar data only to display calendars and events, let you choose which calendars appear, select the current or nearest event, refresh the local read-only view, and open a meeting or source link when you request it.</p>
+          <p>The calendar-list scope is required to identify your calendars and support calendar visibility controls. The events scope is required to read events from those calendars. A narrower identity-only grant cannot provide either feature, and either calendar scope alone cannot provide both the calendar selector and the event views.</p>
+          <p>The developer cannot access your calendar data or tokens because the app sends neither to a Flight Deck server.</p>
+        </section>
+
+        <section id="sharing" aria-labelledby="sharing-title">
+          <p class="eyebrow">03 / Sharing</p>
+          <h2 id="sharing-title">Sharing and disclosure</h2>
+          <p>Flight Deck does not sell, share, or transfer Google user data to the developer, advertisers, analytics services, AI systems, or other third parties. Flight Deck does not integrate with AI services.</p>
+          <p>Your workstation communicates directly with Google and Microsoft only to authorize the account, read the selected calendars, and refresh the local cache.</p>
+          <p>Flight Deck Calendar&apos;s use and transfer of information received from Google APIs adheres to the <a class="inline-link" href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy, including the Limited Use requirements</a>.</p>
+        </section>
+
+        <section id="protection" aria-labelledby="protection-title">
+          <p class="eyebrow">04 / Protection</p>
+          <h2 id="protection-title">Data protection</h2>
+          <dl class="fact-list">
+            <div><dt>OAuth tokens</dt><dd>Flight Deck stores access and refresh tokens in the desktop Secret Service keyring under the <code>omarchy-calendar</code> application attribute.</dd></div>
+            <div><dt>Calendar cache</dt><dd>Flight Deck stores account identifiers and labels, calendar identifiers, names, and colors, event titles, times, locations, descriptions, organizers, status, and meeting and source links, plus provider refresh health. The local SQLite cache is <code>~/.local/state/omarchy-calendar/calendar.db</code> with private file permissions. Its parent directory is accessible only to the local user.</dd></div>
+            <div><dt>Network and links</dt><dd>Flight Deck communicates with Google and Microsoft over HTTPS. Meeting and source actions accept only HTTPS URLs returned with an event and pass each URL to the desktop opener without a shell.</dd></div>
+            <div><dt>Registration metadata</dt><dd>Bundled Google and Microsoft desktop registrations are public application metadata. They cannot grant account access without your browser consent and tokens. Local provider overrides use private file permissions.</dd></div>
+          </dl>
+          <p>The project does not collect, transmit, or retain calendar data on a Flight Deck server because no such server exists.</p>
+        </section>
+
+        <section id="retention" aria-labelledby="retention-title">
+          <p class="eyebrow">05 / Retention</p>
+          <h2 id="retention-title">Retention and deletion</h2>
+          <p>Flight Deck retains Google OAuth tokens until you disconnect Google or reset local data. It retains cached Google Calendar data until a successful refresh replaces the applicable time window, you disconnect Google, or you reset local data. Flight Deck retains no Google user data on a developer-controlled server.</p>
+          <p>When a refresh fails, Flight Deck keeps the last successful local cache visible and marked stale.</p>
+          <p>Disconnecting Google or Outlook deletes that provider&apos;s OAuth tokens from Secret Service and removes its cached accounts and events immediately. Disconnecting does not change the provider calendar.</p>
+          <p>The in-app flow uses two activations: choose Reset local data, then choose Confirm reset. The terminal command <code>calendarctl reset-local-data</code> runs immediately when invoked.</p>
+          <p>Both paths delete all Flight Deck provider tokens, imported Google app credentials, cached events, provider health records, and local provider client-ID overrides. They preserve appearance settings and do not change Google or Microsoft calendar data.</p>
+          <p>Uninstalling the plugin alone does not delete data. Run <code>calendarctl reset-local-data</code> first when complete local removal is wanted.</p>
+        </section>
+
+        <section id="website" aria-labelledby="website-title">
+          <p class="eyebrow">06 / This website</p>
+          <h2 id="website-title">This website does not collect user data.</h2>
+          <p>The site contains no JavaScript, analytics, cookies, tracking, forms, advertising, backend, or database. It loads its stylesheet and product image from relative paths on the same public site.</p>
+          <p>The <a class="inline-link" href="../terms/">Terms of Service</a> describe the software license, provider boundaries, and preview status.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer shell">
+    <p>Flight Deck Calendar keeps its read-only working data on the local workstation.</p>
+    <div>
+      <a href="../">Product</a>
+      <a href="../terms/">Terms</a>
+      <a href="https://github.com/joryeugene/omarchy-calendar/blob/main/PRIVACY.md">Repository policy</a>
+    </div>
+  </footer>
+</body>
+</html>

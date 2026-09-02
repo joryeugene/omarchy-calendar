@@ -17,7 +17,7 @@ class QmlContractTests(unittest.TestCase):
         manifest = json.loads(self.text("manifest.json"))
         bar = self.text("BarWidget.qml")
         self.assertEqual(manifest["id"], "io.github.joryeugene.omarchy-calendar")
-        self.assertEqual(manifest["version"], "1.0.0-rc.3")
+        self.assertEqual(manifest["version"], "1.0.0-rc.4")
         self.assertEqual(set(manifest["kinds"]), {"bar-widget", "service"})
         self.assertEqual(manifest["entryPoints"]["barWidget"], "BarWidget.qml")
         self.assertEqual(manifest["entryPoints"]["service"], "Service.qml")
@@ -245,13 +245,14 @@ class QmlContractTests(unittest.TestCase):
         self.assertIn("TextInput", setup)
         self.assertNotIn("TextInput.Password", setup)
 
-    def test_private_identity_setup_is_truthful_read_only_and_secret_free(self):
+    def test_identity_setup_skips_local_inputs_for_complete_bundles_and_stays_secret_free(self):
         panel = self.text("Panel.qml")
         settings = self.text("SettingsView.qml")
         setup = self.text("SetupView.qml")
         for label in (
             "Private setup is not one-click", "Choose Google Desktop JSON",
             "WHAT FLIGHT DECK REQUESTS", "Connect in browser", "No hosted backend",
+            "Flight Deck's bundled registration is ready",
         ):
             self.assertIn(label, setup)
         self.assertIn("import QtQuick.Dialogs", setup)
@@ -269,10 +270,17 @@ class QmlContractTests(unittest.TestCase):
         self.assertIn("Calendar events read-only", setup)
         self.assertIn("Calendars.Read", setup)
         self.assertIn('visible: root.provider === "microsoft" && !root.providerState.client_configured', setup)
+        self.assertIn('registration_source: ""', panel)
+        self.assertIn('root.providerState.registration_source === "bundled"', setup)
+        self.assertIn("Flight Deck's bundled registration is ready", setup)
+        self.assertIn("Your local registration is ready", setup)
+        self.assertIn(
+            "if (root.providerState.client_configured) root.authenticateRequested(root.provider)",
+            setup,
+        )
         self.assertIn("implicitHeight: content.implicitHeight + Style.space(44)", setup)
         self.assertIn("height: Math.min(parent.height - Style.space(50), setupSurface.implicitHeight)", panel)
-        self.assertIn("Authenticate in your browser after private provider setup", settings)
-        self.assertNotIn("Connect once in your browser", settings)
+        self.assertIn("Authenticate in your browser when connecting", settings)
         self.assertNotIn("The public release will hide this step", setup)
         self.assertNotIn("clientSecret", setup)
         self.assertNotIn("Client secret", setup)

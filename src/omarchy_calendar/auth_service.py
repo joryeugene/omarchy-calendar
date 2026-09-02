@@ -49,7 +49,7 @@ class Authenticator:
             raise ValueError(f"{provider} public client ID is not configured")
         app_credential = ""
         if provider == "google":
-            app_credential = self.keyring.get_app_credential(provider)
+            app_credential = self.settings.google_app_credential(self.keyring)
             if not app_credential:
                 raise ValueError("Google Desktop credentials are not configured")
         flow = self.flow_factory()
@@ -57,7 +57,7 @@ class Authenticator:
             url = authorization_url(provider, client_id, receiver.redirect_uri, flow)
             if not self.browser(url):
                 raise RuntimeError("Could not open the browser for calendar authorization")
-            code = receiver.wait(timeout=180)
+            code = receiver.wait(timeout=600)
         form = {
             "client_id": client_id,
             "code": code,

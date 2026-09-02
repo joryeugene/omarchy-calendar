@@ -109,11 +109,14 @@ def setup_status(
         connected = [item for item in real if item["connected"]]
         configured = bool(settings.client_id(provider))
         if provider == "google" and configured:
-            configured = bool((keyring or SecretServiceStore()).get_app_credential("google"))
+            configured = bool(
+                settings.google_app_credential(keyring or SecretServiceStore())
+            )
         providers.append({
             "provider": provider,
             "label": label,
             "client_configured": configured,
+            "registration_source": settings.registration_source(provider),
             "connected": bool(connected),
             "accounts": len(real),
             "stale": any(bool(item["stale"]) for item in real),
@@ -124,6 +127,23 @@ def setup_status(
         "providers": providers,
         "demo": any(bool(item["demo"]) for item in health),
     }
+
+
+def disconnect_provider(
+    store: CalendarStore,
+    keyring: SecretServiceStore,
+    provider: str,
+    account_id: str | None = None,
+) -> dict[str, object]:
+    accounts = store.accounts(provider)
+    if account_id:
+        accounts = [item for item in accounts if item["account_id"] == account_id]
+    removed = 0
+    for account in accounts:
+        account = str(account["account_id"])
+        keyring.clear(provider, account)
+        removed += store.remove_account(provider, account)
+    return {"provider": provider, "disconnected": removed}
 
 
 def reset_local_data(
@@ -218,15 +238,12 @@ def main(argv: list[str] | None = None) -> int:
                 emit(SyncEngine(store).sync(arguments.provider))
                 return 0
             if arguments.command == "disconnect":
-                keyring = SecretServiceStore()
-                accounts = store.accounts(arguments.provider)
-                if arguments.account:
-                    accounts = [item for item in accounts if item["account_id"] == arguments.account]
-                removed = 0
-                for account in accounts:
-                    keyring.clear(arguments.provider, str(account["account_id"]))
-                    removed += store.remove_account(arguments.provider, str(account["account_id"]))
-                emit({"provider": arguments.provider, "disconnected": removed})
+                emit(disconnect_provider(
+                    store,
+                    SecretServiceStore(),
+                    arguments.provider,
+                    arguments.account,
+                ))
                 return 0
             if arguments.command == "reset-local-data":
                 emit(reset_local_data(store, SecretServiceStore()))

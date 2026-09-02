@@ -36,8 +36,8 @@ Panel {
   property bool expandedDetails: false
   property string setupProvider: ""
   property var setupProviders: [
-    { provider: "google", label: "Google", client_configured: false, connected: false, accounts: 0, stale: false, last_sync: "", last_error: "" },
-    { provider: "microsoft", label: "Outlook", client_configured: false, connected: false, accounts: 0, stale: false, last_sync: "", last_error: "" }
+    { provider: "google", label: "Google", client_configured: false, registration_source: "", connected: false, accounts: 0, stale: false, last_sync: "", last_error: "" },
+    { provider: "microsoft", label: "Outlook", client_configured: false, registration_source: "", connected: false, accounts: 0, stale: false, last_sync: "", last_error: "" }
   ]
   property bool accountBusy: false
   property string accountError: ""
@@ -202,7 +202,7 @@ Panel {
   function providerSetup(provider) {
     for (var i = 0; i < setupProviders.length; i++)
       if (setupProviders[i].provider === provider) return setupProviders[i]
-    return { provider: provider, label: provider, client_configured: false, connected: false }
+    return { provider: provider, label: provider, client_configured: false, registration_source: "", connected: false }
   }
   function providerStatusFor(event) {
     if (!event) return ""

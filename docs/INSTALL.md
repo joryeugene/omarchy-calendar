@@ -2,15 +2,9 @@
 
 Flight Deck Calendar is a self-contained Omarchy shell plugin. It does not install a separate helper, timer, or service and it does not change Hyprland automatically.
 
-## Bring your own OAuth registration
-
-Flight Deck Calendar is a public preview. It does not include Google or Microsoft OAuth registrations. Before installing or connecting a provider, create your own Google Desktop OAuth app and Microsoft public desktop app that supports personal accounts. Each registration must use only the required read-only scopes.
-
-Provider setup needs one browser consent session per provider. This preview is not one-click or seamless account setup.
-
 ## Install
 
-Install the public preview from GitHub:
+The public install command continues to install RC3 from `main`:
 
 ```bash
 omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable
@@ -23,7 +17,17 @@ calendarctl="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar
 "$calendarctl" status
 ```
 
-Try fictional local data without an account:
+Invited RC4 testers should clone the exact verification branch into a clean profile instead:
+
+```bash
+plugin="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar"
+git clone --branch v1.0.0-rc.4-verification --single-branch \
+  https://github.com/joryeugene/omarchy-calendar.git "$plugin"
+omarchy plugin enable io.github.joryeugene.omarchy-calendar --section right
+calendarctl="$plugin/calendarctl"
+```
+
+Try the built-in offline dataset without an account:
 
 ```bash
 "$calendarctl" demo seed
@@ -42,39 +46,37 @@ Reload Hyprland and confirm `hyprctl configerrors` is empty. Remove the single l
 
 ## Provider setup
 
-After completing the bring-your-own registration prerequisite, Flight Deck can open the browser consent flow from Settings.
+Press `c`, choose Google Calendar or Outlook.com, review the requested read-only access, and choose **Connect in browser**. Complete provider consent in the browser, then return to Flight Deck. The provider is connected only after the first successful sync populates the local cache.
 
 ### Google Calendar
 
-Create or use a Google OAuth Desktop app with only the required read-only Calendar scopes. Download its Desktop credentials JSON and keep the file outside the repository. In Flight Deck, press `c`, choose Google Calendar, then choose **Google Desktop JSON**. Flight Deck imports the registration metadata and immediately opens browser authorization.
+Google uses PKCE S256 and receives only identity, `calendar.events.readonly`, and `calendar.calendarlist.readonly` access.
 
-The bundled helper provides the same flow as a command-line fallback:
+### Personal Outlook.com
+
+Microsoft uses the `/consumers` authority and receives identity, profile, offline access, `User.Read`, and `Calendars.Read`. It uses no application credential. There is no `Calendars.ReadWrite` scope and no mutation command.
+
+For either provider, press `c` and choose Connect when browser consent needs to be repeated.
+
+### Advanced provider override
+
+Contributors can replace either bundled public desktop registration without editing source code. A valid local override always takes precedence, and installing RC4 does not replace existing tokens or provider settings.
+
+For Google, import the Desktop credentials JSON from a separate Google Cloud project. The import stores only the public client ID in `~/.config/omarchy-calendar/providers.json`. The Desktop app credential goes directly to a distinct Secret Service keyring item and is not written to provider settings, source code, command arguments, or output.
 
 ```bash
 "$calendarctl" import-google-desktop-app /path/to/google-desktop-credentials.json
 "$calendarctl" auth google
 ```
 
-The import stores only the public client ID in `~/.config/omarchy-calendar/providers.json`. The Desktop app credential goes directly to a distinct Secret Service keyring item. It is not written to the provider settings, source tree, command arguments, or output. Delete the downloaded JSON after independently confirming it is no longer needed for recovery.
-
-Google uses PKCE S256 and receives only identity, `calendar.events.readonly`, and `calendar.calendarlist.readonly` access.
-
-### Personal Outlook.com
-
-Use a Microsoft public desktop application registration that supports personal accounts. In Flight Deck, press `c`, choose Outlook.com, paste its public Application client ID, then choose **Save ID and connect**.
-
-The bundled helper provides the same flow as a command-line fallback:
+For Microsoft, configure the public Application client ID from a personal-account capable desktop registration:
 
 ```bash
 "$calendarctl" configure-client microsoft PUBLIC_MICROSOFT_DESKTOP_ID
 "$calendarctl" auth microsoft
 ```
 
-Microsoft uses the `/consumers` authority and receives identity, profile, offline access, `User.Read`, and `Calendars.Read`. It uses no application credential. There is no `Calendars.ReadWrite` scope and no mutation command.
-
-For either provider, press `c` in Flight Deck after metadata is configured and choose Connect if browser consent needs to be repeated. The provider is connected only after a successful sync, not merely after the browser redirects.
-
-Provider client-ID overrides are written to `~/.config/omarchy-calendar/providers.json` with mode `0600`. OAuth tokens and the Google Desktop app credential are stored in the system keyring. Cached events are stored in `~/.local/state/omarchy-calendar/calendar.db` with mode `0600`.
+Provider client-ID overrides are written to `~/.config/omarchy-calendar/providers.json` with mode `0600`. OAuth tokens and an imported Google Desktop app credential are stored in the system keyring. Bundled public registrations remain in the installed plugin. Cached events are stored in `~/.local/state/omarchy-calendar/calendar.db` with mode `0600`.
 
 ## Operations
 

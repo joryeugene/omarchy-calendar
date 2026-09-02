@@ -301,7 +301,7 @@ Rectangle {
 
               textFormat: Text.PlainText
               width: parent.width
-              text: "Authenticate in your browser after private provider setup. Tokens stay in the system keyring and events stay in the local cache."
+              text: "Authenticate in your browser when connecting. Tokens stay in the system keyring and events stay in the local cache."
               color: root.palette.muted
               font.family: root.fontFamily
               font.pixelSize: Style.font.bodySmall * root.textScale
@@ -688,7 +688,7 @@ Rectangle {
                 anchors.fill: parent
                 anchors.margins: Style.space(14)
                 spacing: Style.space(8)
-                Text { textFormat: Text.PlainText; text: "Flight Deck Calendar  1.0.0 RC 3"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
+                Text { textFormat: Text.PlainText; text: "Flight Deck Calendar  1.0.0 RC 4"; color: root.palette.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.body * root.textScale; font.bold: true }
                 Text { textFormat: Text.PlainText; width: parent.width; text: "Read-only Google and Outlook calendar for Omarchy. No hosted backend, telemetry, analytics, or AI."; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall * root.textScale; wrapMode: Text.Wrap }
                 Text { textFormat: Text.PlainText; width: parent.width; text: "Scopes\nGoogle: identity, calendar lists, and events read-only\nMicrosoft: identity, profile, and Calendars.Read\n\nStorage\nOAuth tokens: Secret Service keyring\nCalendar data: local SQLite cache"; color: root.palette.muted; font.family: root.fontFamily; font.pixelSize: Style.font.caption * root.textScale; lineHeight: 1.35; wrapMode: Text.Wrap }
               }

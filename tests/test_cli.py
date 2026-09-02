@@ -5,10 +5,20 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from datetime import date
 from pathlib import Path
+from unittest.mock import patch
 
+import omarchy_calendar.settings as settings_module
 from omarchy_calendar.cache import CalendarStore
-from omarchy_calendar.cli import import_google_desktop_app, open_event_url, reset_local_data, seed_demo, setup_status
+from omarchy_calendar.cli import (
+    disconnect_provider,
+    import_google_desktop_app,
+    open_event_url,
+    reset_local_data,
+    seed_demo,
+    setup_status,
+)
 from omarchy_calendar.models import ProviderHealth
 from omarchy_calendar.settings import ProviderSettings
 
@@ -56,17 +66,27 @@ class CalendarCliTests(unittest.TestCase):
         cleared = self.run_cli("demo", "clear")
         self.assertEqual(json.loads(cleared.stdout)["cleared_accounts"], 2)
 
-    def test_auth_without_public_client_id_fails_before_browser_open(self):
-        result = self.run_cli("auth", "google")
-        self.assertEqual(result.returncode, 3)
-        self.assertIn("public client ID is not configured", result.stderr)
-        self.assertNotIn("token", result.stderr.lower())
+    def test_bundled_google_registration_is_ready_without_local_configuration(self):
+        result = self.run_cli("setup-status")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        google = next(
+            item for item in json.loads(result.stdout)["providers"]
+            if item["provider"] == "google"
+        )
+        self.assertTrue(google["client_configured"])
+        self.assertEqual(google["registration_source"], "bundled")
+        self.assertFalse(google["connected"])
+        self.assertNotIn("client_id", google)
 
     def test_public_cli_exposes_no_client_secret_configuration(self):
         result = self.run_cli("--help")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertNotIn("configure-client-secret", result.stdout)
-        self.assertNotIn("open-provider-setup", result.stdout)
+        for forbidden in (
+            "configure-client-secret", "open-provider-setup",
+            "create-event", "update-event", "delete-event",
+        ):
+            self.assertNotIn(forbidden, result.stdout)
 
     def test_configure_client_and_setup_status_separate_configuration_from_connection(self):
         configured = self.run_cli(
@@ -78,7 +98,8 @@ class CalendarCliTests(unittest.TestCase):
         initial = json.loads(self.run_cli("setup-status").stdout)
         google = next(item for item in initial["providers"] if item["provider"] == "google")
         outlook = next(item for item in initial["providers"] if item["provider"] == "microsoft")
-        self.assertFalse(google["client_configured"])
+        self.assertTrue(google["client_configured"])
+        self.assertEqual(google["registration_source"], "bundled")
         self.assertFalse(google["connected"])
         self.assertTrue(outlook["client_configured"])
         self.assertNotIn("client_id", outlook)
@@ -116,6 +137,67 @@ class CalendarCliTests(unittest.TestCase):
         ready_google = next(item for item in ready["providers"] if item["provider"] == "google")
         self.assertFalse(missing_google["client_configured"])
         self.assertTrue(ready_google["client_configured"])
+        self.assertEqual(missing_google["registration_source"], "local")
+        self.assertEqual(ready_google["registration_source"], "local")
+
+    def test_setup_status_counts_complete_bundles_without_exposing_registration_values(self):
+        bundled_values = {
+            "google": "bundled.apps.googleusercontent.com",
+            "microsoft": "00001111-aaaa-2222-bbbb-3333cccc4444",
+        }
+        bundled_credential = "bundled-google-credential"
+
+        class NoLocalCredentialKeyring:
+            def get_app_credential(self, _provider):
+                raise AssertionError("bundled Google setup must not read a local credential")
+
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS=bundled_values,
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL=bundled_credential,
+            create=True,
+        ), CalendarStore(self.state / "omarchy-calendar" / "calendar.db") as store:
+            status = setup_status(store, ProviderSettings(), NoLocalCredentialKeyring())
+
+        google = next(item for item in status["providers"] if item["provider"] == "google")
+        microsoft = next(
+            item for item in status["providers"] if item["provider"] == "microsoft"
+        )
+        self.assertTrue(google["client_configured"])
+        self.assertEqual(google["registration_source"], "bundled")
+        self.assertTrue(microsoft["client_configured"])
+        self.assertEqual(microsoft["registration_source"], "bundled")
+        serialized = json.dumps(status)
+        self.assertNotIn(bundled_values["google"], serialized)
+        self.assertNotIn(bundled_values["microsoft"], serialized)
+        self.assertNotIn(bundled_credential, serialized)
+
+    def test_setup_status_never_completes_a_local_google_id_with_bundled_credential(self):
+        class MissingLocalCredentialKeyring:
+            def get_app_credential(self, provider):
+                self.provider = provider
+                return ""
+
+        keyring = MissingLocalCredentialKeyring()
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "",
+            },
+            BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL="bundled-google-credential",
+            create=True,
+        ), CalendarStore(self.state / "omarchy-calendar" / "calendar.db") as store:
+            status = setup_status(
+                store,
+                ProviderSettings(google_client_id="local.apps.googleusercontent.com"),
+                keyring,
+            )
+
+        google = next(item for item in status["providers"] if item["provider"] == "google")
+        self.assertFalse(google["client_configured"])
+        self.assertEqual(google["registration_source"], "local")
+        self.assertEqual(keyring.provider, "google")
 
     def test_import_google_desktop_app_keeps_credential_out_of_settings_and_result(self):
         class FakeKeyring:
@@ -274,16 +356,67 @@ class CalendarCliTests(unittest.TestCase):
         appearance_path = settings_path.parent / "appearance.json"
         appearance_path.write_text('{"theme":"high-contrast"}\n', encoding="utf-8")
         keyring = FakeKeyring()
-        with CalendarStore(self.state / "omarchy-calendar" / "calendar.db") as store:
+        with patch.multiple(
+            settings_module,
+            BUNDLED_PUBLIC_CLIENT_IDS={
+                "google": "bundled.apps.googleusercontent.com",
+                "microsoft": "00001111-aaaa-2222-bbbb-3333cccc4444",
+            },
+        ), CalendarStore(self.state / "omarchy-calendar" / "calendar.db") as store:
             store.set_health(ProviderHealth.ok("google", "real-account", "2026-08-25T12:00:00Z"))
 
             result = reset_local_data(store, keyring, settings_path)
 
             self.assertEqual(result["providers"], 1)
             self.assertEqual(store.health_records(), [])
+            reset_settings = ProviderSettings.load(settings_path)
+            self.assertEqual(
+                reset_settings.client_id("google"),
+                "bundled.apps.googleusercontent.com",
+            )
+            self.assertEqual(reset_settings.registration_source("google"), "bundled")
         self.assertTrue(keyring.cleared)
         self.assertFalse(settings_path.exists())
         self.assertTrue(appearance_path.is_file())
+
+    def test_disconnect_removes_only_one_providers_tokens_and_cached_events(self):
+        class FakeKeyring:
+            def __init__(self):
+                self.cleared = []
+
+            def clear(self, provider, account_id):
+                self.cleared.append((provider, account_id))
+
+        settings_path = self.config / "omarchy-calendar" / "providers.json"
+        appearance_path = settings_path.parent / "appearance.json"
+        ProviderSettings(
+            google_client_id="local.apps.googleusercontent.com",
+            microsoft_client_id="11111111-2222-3333-4444-555555555555",
+        ).save(settings_path)
+        appearance_path.write_text('{"theme":"high-contrast"}\n', encoding="utf-8")
+        settings_before = settings_path.read_bytes()
+        appearance_before = appearance_path.read_bytes()
+        keyring = FakeKeyring()
+        with CalendarStore(self.state / "omarchy-calendar" / "calendar.db") as store:
+            seed_demo(store, date(2026, 8, 25))
+            store.set_health(ProviderHealth.ok("google", "demo-google", "2026-08-25T12:00:00Z"))
+            store.set_health(ProviderHealth.ok("microsoft", "demo-microsoft", "2026-08-25T12:00:00Z"))
+
+            result = disconnect_provider(store, keyring, "google")
+
+            self.assertEqual(result, {"provider": "google", "disconnected": 1})
+            self.assertEqual(keyring.cleared, [("google", "demo-google")])
+            self.assertEqual(store.accounts(), [{
+                "provider": "microsoft", "account_id": "demo-microsoft", "connected": True,
+            }])
+            self.assertTrue(all(
+                event["provider"] == "microsoft"
+                for event in store.view(
+                    "2026-08-24T00:00:00-05:00", "2026-09-01T00:00:00-05:00"
+                )["events"]
+            ))
+        self.assertEqual(settings_path.read_bytes(), settings_before)
+        self.assertEqual(appearance_path.read_bytes(), appearance_before)
 
 
 if __name__ == "__main__":
