@@ -457,6 +457,10 @@ class ReleaseLayoutTests(unittest.TestCase):
         self.assertEqual(manifest["version"], "1.0.0")
         self.assertEqual(project["project"]["version"], "1.0.0")
         self.assertEqual(__version__, "1.0.0")
+        self.assertNotIn(
+            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+            project["project"]["classifiers"],
+        )
         self.assertIn("Flight Deck Calendar  1.0.0", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
         self.assertNotIn("RC", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
 
