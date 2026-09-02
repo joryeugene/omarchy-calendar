@@ -1,10 +1,8 @@
 # Flight Deck Calendar installation
 
-Flight Deck Calendar is a self-contained Omarchy shell plugin. It does not install a separate helper, timer, or service and it does not change Hyprland automatically.
+Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel. It does not install a separate helper, timer, or service, and it does not change Hyprland automatically.
 
 ## Install
-
-The public install command continues to install RC3 from `main`:
 
 ```bash
 omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable
@@ -15,16 +13,6 @@ The installed plugin ID is `io.github.joryeugene.omarchy-calendar`. Its bundled 
 ```bash
 calendarctl="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar/calendarctl"
 "$calendarctl" status
-```
-
-Invited RC4 testers should clone the exact verification branch into a clean profile instead:
-
-```bash
-plugin="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar"
-git clone --branch v1.0.0-rc.4-verification --single-branch \
-  https://github.com/joryeugene/omarchy-calendar.git "$plugin"
-omarchy plugin enable io.github.joryeugene.omarchy-calendar --section right
-calendarctl="$plugin/calendarctl"
 ```
 
 Try the built-in offline dataset without an account:
@@ -60,7 +48,7 @@ For either provider, press `c` and choose Connect when browser consent needs to 
 
 ### Advanced provider override
 
-Contributors can replace either bundled public desktop registration without editing source code. A valid local override always takes precedence, and installing RC4 does not replace existing tokens or provider settings.
+Contributors can replace either bundled public desktop registration without editing source code. A valid local override always takes precedence, and updates do not replace existing tokens or provider settings.
 
 For Google, import the Desktop credentials JSON from a separate Google Cloud project. The import stores only the public client ID in `~/.config/omarchy-calendar/providers.json`. The Desktop app credential goes directly to a distinct Secret Service keyring item and is not written to provider settings, source code, command arguments, or output.
 

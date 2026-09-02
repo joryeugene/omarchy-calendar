@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "io.github.joryeugene.omarchy-calendar",
   "name": "Flight Deck Calendar",
-  "version": "1.0.0-rc.4",
+  "version": "1.0.0",
   "author": "Jory Eugene",
-  "description": "Read-only Google and Outlook calendar with Focus Today and Time Grid Week views",
+  "description": "Google Calendar and Outlook in one read-only Omarchy panel",
   "kinds": [
     "bar-widget",
     "service"

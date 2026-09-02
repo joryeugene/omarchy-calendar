@@ -61,7 +61,6 @@ def _static_site_dependency_violations(site):
     homepage = site / "index.html"
     privacy = site / "privacy" / "index.html"
     terms = site / "terms" / "index.html"
-    verification = site / "verification" / "index.html"
     published = site / "assets" / "flight-deck-calendar-week.png"
     headers = site / "_headers"
     violations = []
@@ -74,9 +73,8 @@ def _static_site_dependency_violations(site):
         Path("privacy/index.html"),
         Path("styles.css"),
         Path("terms/index.html"),
-        Path("verification/index.html"),
     }
-    for path in (homepage, privacy, terms, verification, site / "styles.css", published, headers):
+    for path in (homepage, privacy, terms, site / "styles.css", published, headers):
         if not path.is_file():
             violations.append(f"missing artifact: {path.relative_to(site)}")
     if violations:
@@ -456,15 +454,16 @@ class ReleaseLayoutTests(unittest.TestCase):
         manifest = json.loads((ROOT / "manifest.json").read_text(encoding="utf-8"))
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
 
-        self.assertEqual(manifest["version"], "1.0.0-rc.4")
-        self.assertEqual(project["project"]["version"], "1.0.0rc4")
-        self.assertEqual(__version__, "1.0.0rc4")
-        self.assertIn("1.0.0 RC 4", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
+        self.assertEqual(manifest["version"], "1.0.0")
+        self.assertEqual(project["project"]["version"], "1.0.0")
+        self.assertEqual(__version__, "1.0.0")
+        self.assertIn("Flight Deck Calendar  1.0.0", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
+        self.assertNotIn("RC", (ROOT / "SettingsView.qml").read_text(encoding="utf-8"))
 
-    def test_candidate_release_requires_bundled_provider_registrations(self):
-        candidate_setup_copy = "\n".join(
+    def test_stable_release_requires_bundled_provider_registrations(self):
+        stable_setup_copy = "\n".join(
             (ROOT / path).read_text(encoding="utf-8")
-            for path in ("README.md", "docs/INSTALL.md", "site/verification/index.html")
+            for path in ("README.md", "docs/INSTALL.md")
         )
         bundled = settings_module.BUNDLED_PUBLIC_CLIENT_IDS
         google_credential = settings_module.BUNDLED_GOOGLE_DESKTOP_APP_CREDENTIAL
@@ -478,10 +477,10 @@ class ReleaseLayoutTests(unittest.TestCase):
             r"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
         )
         self.assertTrue(google_credential.startswith("GOCSPX-"))
-        self.assertIn("Connect in browser", candidate_setup_copy)
-        self.assertIn("Advanced provider override", candidate_setup_copy)
-        self.assertNotIn("Bring your own OAuth", candidate_setup_copy)
-        self.assertNotIn("not one-click or seamless", candidate_setup_copy)
+        self.assertIn("Connect in browser", stable_setup_copy)
+        self.assertIn("Advanced provider override", stable_setup_copy)
+        self.assertNotIn("Bring your own OAuth", stable_setup_copy)
+        self.assertNotIn("not one-click or seamless", stable_setup_copy)
 
     def test_public_tree_excludes_private_reports_and_generated_files(self):
         for internal in (

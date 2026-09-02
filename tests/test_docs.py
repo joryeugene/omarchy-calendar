@@ -48,7 +48,6 @@ class DocumentationTests(unittest.TestCase):
             SITE / "index.html",
             SITE / "privacy" / "index.html",
             SITE / "terms" / "index.html",
-            SITE / "verification" / "index.html",
         )
         for page in pages:
             self.assertTrue(page.is_file(), page)
@@ -65,7 +64,7 @@ class DocumentationTests(unittest.TestCase):
                     resolved /= "index.html"
                 self.assertTrue(resolved.is_file(), (page, target))
 
-    def test_static_site_explains_preview_access_storage_and_deletion_behavior(self):
+    def test_static_site_explains_stable_access_storage_and_deletion_behavior(self):
         homepage_path = SITE / "index.html"
         privacy_path = SITE / "privacy" / "index.html"
         terms_path = SITE / "terms" / "index.html"
@@ -79,10 +78,9 @@ class DocumentationTests(unittest.TestCase):
 
         for required in (
             "omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable",
-            "Bring your own desktop OAuth registration",
-            "Google Desktop OAuth app",
-            "Microsoft public desktop app",
-            "not one-click or seamless",
+            "Connect each account in the browser",
+            "You do not need a Google Cloud or Microsoft Entra project",
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
             "https://www.googleapis.com/auth/calendar.events.readonly",
             "https://www.googleapis.com/auth/calendar.calendarlist.readonly",
             "openid",
@@ -122,6 +120,11 @@ class DocumentationTests(unittest.TestCase):
             "requires two confirmations",
             "focused desktop workflow",
             "local-first",
+            "public preview",
+            "verification candidate",
+            "one-click",
+            "seamless",
+            "fictional",
         ):
             self.assertNotIn(forbidden, public_copy)
 
@@ -165,9 +168,13 @@ class DocumentationTests(unittest.TestCase):
         ):
             self.assertIn(required, privacy)
 
-    def test_candidate_docs_make_bundled_setup_primary_and_overrides_advanced(self):
+    def test_stable_docs_make_bundled_setup_primary_and_overrides_advanced(self):
         for path in (ROOT / "README.md", ROOT / "docs" / "INSTALL.md"):
             document = path.read_text(encoding="utf-8")
+            self.assertIn(
+                "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+                document,
+            )
             connect = document.index("Connect in browser")
             advanced = document.index("Advanced provider override")
             self.assertLess(connect, advanced)
@@ -175,16 +182,24 @@ class DocumentationTests(unittest.TestCase):
             self.assertIn("Outlook.com", document)
             self.assertNotIn("## Bring your own OAuth registration", document)
             self.assertNotIn("not one-click or seamless", document)
+            self.assertNotIn("RC3", document)
+            self.assertNotIn("RC4", document)
+            self.assertNotIn("verification candidate", document)
 
-    def test_verification_page_names_the_exact_branch_without_replacing_rc3(self):
-        verification = (SITE / "verification" / "index.html").read_text(encoding="utf-8")
+    def test_stable_site_removes_verification_candidate_and_marks_v1(self):
         homepage = (SITE / "index.html").read_text(encoding="utf-8")
-        self.assertIn("v1.0.0-rc.4-verification", verification)
-        self.assertNotIn("codex" + "/", verification)
-        self.assertIn("Connect in browser", verification)
-        self.assertIn("Advanced provider override", verification)
-        self.assertIn("v1.0.0-rc.3 for Omarchy", homepage)
-        self.assertNotIn("v1.0.0-rc.4", homepage)
+        self.assertFalse((SITE / "verification" / "index.html").exists())
+        self.assertIn("v1.0.0 for Omarchy", homepage)
+        self.assertIn(
+            "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+            homepage,
+        )
+        self.assertIn(
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
+            homepage,
+        )
+        self.assertNotIn("rc.3", homepage.lower())
+        self.assertNotIn("rc.4", homepage.lower())
 
     def test_install_guide_covers_security_setup_and_operations(self):
         guide = (ROOT / "docs/INSTALL.md").read_text(encoding="utf-8")
@@ -236,7 +251,23 @@ class DocumentationTests(unittest.TestCase):
         self.assertGreater(readme.index(today_image), readme.index("## Keyboard map"))
         self.assertLess(readme.index(today_image), readme.index("## Settings and themes"))
         self.assertIn("No hosted backend", readme)
-        self.assertIn("public preview", readme)
+        self.assertIn(
+            "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+            readme,
+        )
+        self.assertIn(
+            "https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0",
+            readme,
+        )
+        for forbidden in (
+            "public preview",
+            "verification candidate",
+            "fictional",
+            "one-click",
+            "seamless",
+            "local-first",
+        ):
+            self.assertNotIn(forbidden, readme.lower())
         self.assertNotIn("private local installation", readme)
         self.assertNotIn("rollback flow", readme)
         for key in (

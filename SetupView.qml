@@ -94,8 +94,8 @@ Rectangle {
           ? "Flight Deck's bundled registration is ready. Connect in the browser and return after granting read-only calendar access."
           : "Your local registration is ready. Connect in the browser and return after granting read-only calendar access."
         : root.provider === "google"
-          ? "Private setup is not one-click. Choose the Google OAuth Desktop JSON downloaded from Google Cloud once. It identifies your private Desktop app and is not your calendar password."
-          : "Private setup is not one-click. Paste the public Application client ID from a personal-account capable Microsoft Entra app once. It identifies your private Desktop app and is not a password."
+          ? "This build has no bundled Google registration. Contributors can import a Google Desktop credentials JSON file as an advanced override."
+          : "This build has no bundled Microsoft registration. Contributors can enter a personal-account capable public application ID as an advanced override."
       color: root.palette.muted
       font.family: root.fontFamily
       font.pixelSize: Style.font.bodySmall * root.textScale

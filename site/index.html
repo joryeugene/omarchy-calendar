@@ -26,9 +26,9 @@
   <main id="main">
     <section class="hero shell" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="release-label">v1.0.0-rc.3 for Omarchy</p>
+        <p class="release-label">v1.0.0 for Omarchy</p>
         <h1 id="hero-title">Google Calendar and Outlook for the Omarchy bar.</h1>
-        <p class="lede">Check today, scan the week, and open the next meeting without leaving your workspace.</p>
+        <p class="lede">Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel. Accounts connect in the browser, tokens stay in the system keyring, and calendar data stays on the workstation.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#install">Install</a>
           <a class="button button-secondary" href="privacy/">Privacy</a>
@@ -61,17 +61,18 @@
 
     <section class="section shell install" id="install" aria-labelledby="install-title">
       <div class="install-copy">
-        <p class="eyebrow">Install the public preview</p>
+        <p class="eyebrow">Install Flight Deck</p>
         <h2 id="install-title">Add Flight Deck from GitHub.</h2>
-        <p>Run the Omarchy plugin command, then try the built-in offline dataset or connect a provider after completing the registration prerequisite.</p>
+        <p>Run the Omarchy plugin command, open Calendars, and connect Google Calendar or Outlook.com in the browser.</p>
         <pre><code>omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable</code></pre>
       </div>
       <aside class="preview-notice" aria-labelledby="oauth-title">
-        <p class="notice-label">Current preview requirement</p>
-        <h3 id="oauth-title">Bring your own desktop OAuth registration</h3>
-        <p>Flight Deck does not ship Google or Microsoft OAuth registrations yet. Before connecting a provider, create a Google Desktop OAuth app and a Microsoft public desktop app that supports personal accounts.</p>
-        <p>Provider setup requires one browser consent session per provider, so this preview is not one-click or seamless.</p>
-        <a class="text-link" href="https://github.com/joryeugene/omarchy-calendar/blob/main/docs/INSTALL.md">Open the provider setup guide <span aria-hidden="true">&#8594;</span></a>
+        <p class="notice-label">Account setup</p>
+        <h3 id="oauth-title">Connect each account in the browser.</h3>
+        <p>Choose Google Calendar or Outlook.com, review the requested read-only access, and complete the provider&apos;s consent screen. Events appear after the first refresh.</p>
+        <p>You do not need a Google Cloud or Microsoft Entra project. Flight Deck includes the public desktop registrations required by both providers.</p>
+        <a class="text-link" href="https://github.com/joryeugene/omarchy-calendar/blob/main/docs/INSTALL.md">Read the installation guide <span aria-hidden="true">&#8594;</span></a>
+        <a class="text-link" href="https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0">Open the stable release <span aria-hidden="true">&#8594;</span></a>
       </aside>
     </section>
   </main>

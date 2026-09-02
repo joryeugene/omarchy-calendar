@@ -17,7 +17,7 @@ class QmlContractTests(unittest.TestCase):
         manifest = json.loads(self.text("manifest.json"))
         bar = self.text("BarWidget.qml")
         self.assertEqual(manifest["id"], "io.github.joryeugene.omarchy-calendar")
-        self.assertEqual(manifest["version"], "1.0.0-rc.4")
+        self.assertEqual(manifest["version"], "1.0.0")
         self.assertEqual(set(manifest["kinds"]), {"bar-widget", "service"})
         self.assertEqual(manifest["entryPoints"]["barWidget"], "BarWidget.qml")
         self.assertEqual(manifest["entryPoints"]["service"], "Service.qml")
@@ -220,6 +220,10 @@ class QmlContractTests(unittest.TestCase):
         panel = self.text("Panel.qml")
         settings = self.text("SettingsView.qml")
         setup = self.text("SetupView.qml")
+        self.assertIn(
+            "Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel.",
+            settings,
+        )
         self.assertIn('import "CalendarModel.js" as CalendarModel', settings)
         self.assertIn("CalendarModel.updateStatus([modelData], new Date())", settings)
         self.assertIn('objectName: "settingsSurface"', settings)
@@ -239,7 +243,7 @@ class QmlContractTests(unittest.TestCase):
         ):
             self.assertIn(command, panel)
         for label in (
-            "Connect", "Disconnect", "Confirm disconnect", "Confirm reset", "Read-only", "system keyring",
+            "Connect", "Disconnect", "Confirm disconnect", "Confirm reset", "read-only", "system keyring",
         ):
             self.assertIn(label, settings + setup)
         self.assertIn("TextInput", setup)
@@ -250,7 +254,7 @@ class QmlContractTests(unittest.TestCase):
         settings = self.text("SettingsView.qml")
         setup = self.text("SetupView.qml")
         for label in (
-            "Private setup is not one-click", "Choose Google Desktop JSON",
+            "This build has no bundled Google registration", "Choose Google Desktop JSON",
             "WHAT FLIGHT DECK REQUESTS", "Connect in browser", "No hosted backend",
             "Flight Deck's bundled registration is ready",
         ):

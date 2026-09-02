@@ -1,35 +1,22 @@
 # Flight Deck Calendar for Omarchy
 
-Flight Deck Calendar is a keyboard-first, read-only Google and Outlook calendar cockpit. No hosted backend receives calendar data. Tokens stay in the system keyring, and calendar data stays on the workstation.
+Flight Deck Calendar puts Google Calendar and Outlook in one read-only Omarchy panel. Accounts connect in the browser, tokens stay in the system keyring, and calendar data stays on the workstation. No hosted backend receives calendar data.
 
-See the product overview at [calendar.pestorious.com](https://calendar.pestorious.com/) and read the [privacy policy](https://calendar.pestorious.com/privacy/).
+See the [product overview](https://calendar.pestorious.com/), read the [privacy policy](https://calendar.pestorious.com/privacy/), or download the [stable release](https://github.com/joryeugene/omarchy-calendar/releases/tag/v1.0.0).
 
-![Flight Deck Calendar Week view with fictional Google and Outlook events, an all-day lane, overlapping meetings, and current-time context](screenshots/flight-deck-calendar-week.png)
+![Flight Deck Calendar Week view with Google and Outlook events, an all-day lane, overlapping meetings, and current-time context](screenshots/flight-deck-calendar-week.png)
 
-The Week view shows the promise in one glance: Google and Outlook together in a spatial time grid, with all-day events, overlapping meetings, current-time context, and keyboard navigation. Today turns the same local calendar into a focused agenda with persistent event details and one-key meeting actions.
-
-This branch contains the v1 account-setup verification candidate. The supported public preview remains RC3 on `main` until provider verification and external installation testing are complete.
+The Week view places Google and Outlook events on the same time grid. It shows all-day events, overlapping meetings, current-time context, and keyboard navigation. Today presents the same calendars as an agenda with persistent event details and meeting actions.
 
 ## Install
 
-Requirements: current Omarchy with shell plugins, Python 3.11 or newer, Node.js for development checks, and `secret-tool` for provider tokens.
-
-The public install command continues to install RC3 from `main`:
+Requirements: current Omarchy with shell plugins, Python 3.11 or newer, and `secret-tool` for provider tokens. Node.js is required only for development checks.
 
 ```bash
 omarchy plugin add https://github.com/joryeugene/omarchy-calendar.git --enable
 ```
 
 The plugin manager clones the self-contained plugin. It does not install a user systemd timer, copy a helper into `~/.local/bin`, or edit Hyprland.
-
-Invited RC4 testers should use the exact verification branch in a clean profile:
-
-```bash
-plugin="$HOME/.config/omarchy/plugins/io.github.joryeugene.omarchy-calendar"
-git clone --branch v1.0.0-rc.4-verification --single-branch \
-  https://github.com/joryeugene/omarchy-calendar.git "$plugin"
-omarchy plugin enable io.github.joryeugene.omarchy-calendar --section right
-```
 
 To try the built-in offline dataset before connecting an account:
 
@@ -47,7 +34,7 @@ Google requests identity plus `calendar.events.readonly` and `calendar.calendarl
 
 ### Advanced provider override
 
-Contributors can replace either bundled public desktop registration without changing source code. A valid local override always takes precedence, and installing RC4 does not replace existing tokens or provider settings.
+Contributors can replace either bundled public desktop registration without changing source code. A valid local override always takes precedence, and updates do not replace existing tokens or provider settings.
 
 For Google, import the Desktop credentials JSON from a separate Google Cloud project:
 
@@ -88,9 +75,9 @@ No shortcut requires Alt or number keys.
 
 ## Today focus and meeting actions
 
-![Flight Deck Calendar Today view with a Customer demo selected, marked as a video call, and its one-key Join meeting action active](screenshots/flight-deck-calendar-today.png)
+![Flight Deck Calendar Today view with a selected video call and its Join meeting action available](screenshots/flight-deck-calendar-today.png)
 
-The selected video call demonstrates persistent event details and the same safe meeting-link opener used by live Google and Outlook events.
+Select a video call to keep its details visible and open its meeting link with `m`.
 
 ## Settings and themes
 
