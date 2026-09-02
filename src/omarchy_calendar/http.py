@@ -8,6 +8,7 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Mapping
 
+from . import __version__
 from .keyring import redact
 
 
@@ -60,7 +61,7 @@ class ReadOnlyHttp:
             raise ReadOnlyViolation("Provider requests require HTTPS")
         request_headers = {
             "Accept": "application/json",
-            "User-Agent": "omarchy-calendar/0.1",
+            "User-Agent": f"omarchy-calendar/{__version__}",
             **dict(headers or {}),
         }
         request = urllib.request.Request(url, data=data, headers=request_headers, method=method)

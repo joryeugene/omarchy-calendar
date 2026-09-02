@@ -4,6 +4,7 @@ import json
 import unittest
 from email.message import Message
 
+from omarchy_calendar import __version__
 from omarchy_calendar.http import ReadOnlyHttp, ReadOnlyViolation
 
 
@@ -43,6 +44,10 @@ class ReadOnlyHttpTests(unittest.TestCase):
         self.assertEqual(result, {"value": [1]})
         self.assertEqual(opener.requests[0][0].get_method(), "GET")
         self.assertEqual(opener.requests[0][1], 20)
+        self.assertEqual(
+            opener.requests[0][0].get_header("User-agent"),
+            f"omarchy-calendar/{__version__}",
+        )
 
     def test_provider_transport_rejects_calendar_post(self):
         http = ReadOnlyHttp(opener=FakeOpener({}))

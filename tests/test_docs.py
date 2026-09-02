@@ -15,10 +15,13 @@ class LinkParser(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.targets = []
+        self.ids = set()
 
     def handle_starttag(self, tag, attributes):
         attribute_name = "src" if tag == "img" else "href" if tag in {"a", "link"} else ""
         values = dict(attributes)
+        if values.get("id"):
+            self.ids.add(values["id"])
         if attribute_name and values.get(attribute_name):
             self.targets.append(values[attribute_name])
 
@@ -55,14 +58,18 @@ class DocumentationTests(unittest.TestCase):
             parser.feed(page.read_text(encoding="utf-8"))
             for target in parser.targets:
                 parsed = urlsplit(target)
-                if parsed.scheme or parsed.netloc or target.startswith("#"):
+                if parsed.scheme or parsed.netloc:
                     continue
                 self.assertFalse(parsed.path.startswith("/"), (page, target))
-                resolved = (page.parent / unquote(parsed.path)).resolve()
+                resolved = page if not parsed.path else (page.parent / unquote(parsed.path)).resolve()
                 self.assertTrue(resolved.is_relative_to(SITE.resolve()), (page, target))
                 if resolved.is_dir():
                     resolved /= "index.html"
                 self.assertTrue(resolved.is_file(), (page, target))
+                if parsed.fragment:
+                    destination = LinkParser()
+                    destination.feed(resolved.read_text(encoding="utf-8"))
+                    self.assertIn(unquote(parsed.fragment), destination.ids, (page, target))
 
     def test_static_site_explains_stable_access_storage_and_deletion_behavior(self):
         homepage_path = SITE / "index.html"
