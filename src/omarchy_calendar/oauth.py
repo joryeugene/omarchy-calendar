@@ -102,7 +102,7 @@ def authorization_url(
         common.update({
             "scope": " ".join(GOOGLE_EDIT_SCOPES if access == "edit" else GOOGLE_SCOPES),
             "access_type": "offline",
-            "prompt": "consent",
+            "prompt": "select_account consent",
         })
         base = "https://accounts.google.com/o/oauth2/v2/auth"
     elif provider == "microsoft":

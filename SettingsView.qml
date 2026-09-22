@@ -30,7 +30,7 @@ Rectangle {
   signal disconnectRequested(string provider, string accountId)
   signal resetRequested()
 
-  readonly property var sections: ["Accounts and Calendars", "Appearance", "Preferences", "About and Privacy"]
+  readonly property var sections: ["Accounts and Calendars", "Appearance", "Preferences", "About and Privacy", "Help"]
   readonly property var accountItems: SettingsModel.accountRows(providers, calendars, providerHealth)
   readonly property var accountActionItems: SettingsModel.accountActions(accountItems)
   readonly property var appearanceControls: [
@@ -377,7 +377,7 @@ Rectangle {
                       width: Style.space(modelData.kind === "enable" ? 132 : 112)
                       height: Style.space(38)
                       radius: Style.space(6)
-                      color: modelData.kind === "enable" || modelData.kind === "connect" ? root.palette.accent
+                      color: modelData.kind === "enable" || modelData.kind === "connect" || modelData.kind === "add" ? root.palette.accent
                         : root.pendingDisconnect === modelData.provider + ":" + modelData.account_id ? root.palette.urgent : "transparent"
                       border.color: current ? root.palette.foreground : modelData.kind === "disconnect" ? root.palette.urgent : root.palette.accent
                       border.width: current ? 2 : 1
@@ -385,7 +385,7 @@ Rectangle {
                         textFormat: Text.PlainText
                         anchors.centerIn: parent
                         width: parent.width - Style.space(10)
-                        text: modelData.kind === "enable" ? "Enable editing" : modelData.kind === "connect" ? "Connect"
+                        text: modelData.kind === "enable" ? "Enable editing" : modelData.kind === "add" ? "Add account" : modelData.kind === "connect" ? "Connect"
                           : root.pendingDisconnect === modelData.provider + ":" + modelData.account_id ? "Confirm" : "Disconnect"
                         color: modelData.kind === "disconnect" && root.pendingDisconnect !== modelData.provider + ":" + modelData.account_id ? root.palette.urgent : root.palette.background
                         font.family: root.fontFamily
@@ -770,6 +770,14 @@ Rectangle {
                 MouseArea { anchors.fill: parent; onClicked: root.resetRequested() }
               }
             }
+          }
+
+          HelpOverlay {
+            visible: root.sectionIndex === 4
+            anchors.fill: parent
+            palette: root.palette
+            fontFamily: root.fontFamily
+            textScale: root.textScale
           }
         }
 

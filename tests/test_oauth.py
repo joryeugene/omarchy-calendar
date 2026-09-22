@@ -43,6 +43,7 @@ class OAuthTests(unittest.TestCase):
         self.assertNotIn("auth/calendar ", query["scope"][0] + " ")
         self.assertEqual(query["code_challenge_method"], ["S256"])
         self.assertEqual(query["access_type"], ["offline"])
+        self.assertEqual(set(query["prompt"][0].split()), {"select_account", "consent"})
 
     def test_google_edit_authorization_adds_only_owned_event_scope(self):
         url = authorization_url(

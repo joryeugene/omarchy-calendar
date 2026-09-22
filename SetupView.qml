@@ -34,10 +34,8 @@ Rectangle {
     function activatePrimary() {
         if (root.busy)
             return;
-        if (root.providerState.client_configured)
+        if (root.provider === "google" || root.providerState.client_configured)
             root.authenticateRequested(root.provider, root.accessChoice);
-        else if (root.provider === "google")
-            googleCredentialsDialog.open();
         else if (clientInput.text.trim() !== "")
             root.configureRequested(root.provider, clientInput.text.trim());
     }
@@ -51,8 +49,10 @@ Rectangle {
 
     FileDialog {
         id: googleCredentialsDialog
+        objectName: "googleCredentialsDialog"
         title: "Choose Google Desktop credentials"
         fileMode: FileDialog.OpenFile
+        options: FileDialog.DontUseNativeDialog
         nameFilters: ["Google Desktop credentials (*.json)", "JSON files (*.json)"]
         onAccepted: root.importRequested(String(selectedFile))
     }
@@ -274,7 +274,7 @@ Rectangle {
                 Text {
                     textFormat: Text.PlainText
                     anchors.centerIn: parent
-                    text: root.busy ? "Working" : root.providerState.client_configured ? "Connect in browser" : root.provider === "google" ? "Choose Google Desktop JSON" : "Save ID and connect"
+                    text: root.busy ? "Working" : (root.provider === "google" || root.providerState.client_configured) ? "Connect in browser" : "Save ID and connect"
                     color: root.busy ? root.palette.muted : root.palette.background
                     font.family: root.fontFamily
                     font.pixelSize: Style.font.bodySmall * root.textScale
@@ -284,6 +284,31 @@ Rectangle {
                     anchors.fill: parent
                     enabled: !root.busy && (root.providerState.client_configured || root.provider === "google" || clientInput.text.trim() !== "")
                     onClicked: root.activatePrimary()
+                }
+            }
+
+            Rectangle {
+                visible: root.provider === "google"
+                objectName: "googleJsonImport"
+                width: parent.width
+                height: visible ? Style.space(38) : 0
+                radius: Style.space(6)
+                color: "transparent"
+                border.color: root.palette.border
+                border.width: 1
+                Text {
+                    textFormat: Text.PlainText
+                    anchors.centerIn: parent
+                    text: "Import Google Desktop credentials JSON (advanced)"
+                    color: root.palette.foreground
+                    font.family: root.fontFamily
+                    font.pixelSize: Style.font.caption * root.textScale
+                    font.bold: true
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    enabled: !root.busy
+                    onClicked: googleCredentialsDialog.open()
                 }
             }
 

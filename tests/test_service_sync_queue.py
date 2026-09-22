@@ -54,14 +54,8 @@ class ServiceSyncQueueTests(unittest.TestCase):
                     ShellRoot {{
                       property bool queued: false
 
-                      QtObject {{
-                        id: testManifest
-                        property string __sourceDir: {str(test_dir)!r}
-                      }}
-
                       Service {{
                         id: service
-                        manifest: testManifest
                         syncIntervalMinutes: 60
                       }}
 

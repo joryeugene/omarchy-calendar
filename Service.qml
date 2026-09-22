@@ -8,8 +8,15 @@ Item {
 
   property var shell: null
   property var manifest: null
-  readonly property string helperPath: manifest && manifest.__sourceDir
-    ? String(manifest.__sourceDir) + "/calendarctl" : ""
+  // The host hands third-party plugins a sanitized manifest with no
+  // __sourceDir, so resolve the bundled helper from this component's own
+  // location instead of trusting the injected manifest.
+  readonly property string helperPath: {
+    var url = String(Qt.resolvedUrl("calendarctl"));
+    if (url.indexOf("file://") === 0)
+      url = decodeURIComponent(url.slice(7));
+    return url;
+  }
   property bool syncing: false
   property bool syncQueued: false
   property int revision: 0

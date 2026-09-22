@@ -8,6 +8,7 @@ from urllib.parse import parse_qs, urlparse
 
 import omarchy_calendar.settings as settings_module
 from omarchy_calendar.auth_service import Authenticator
+from omarchy_calendar import auth_service
 from omarchy_calendar.cache import CalendarStore
 from omarchy_calendar.cli import seed_demo
 from omarchy_calendar.http import HttpError
@@ -553,6 +554,36 @@ class AuthenticatorTests(unittest.TestCase):
             self.assertTrue(view["demo"])
             self.assertEqual(len(view["events"]), 10)
             store.close()
+
+
+class SystemBrowserTests(unittest.TestCase):
+    def test_prefers_the_omarchy_launcher_that_focuses_the_browser(self):
+        with tempfile.TemporaryDirectory() as directory:
+            launcher = Path(directory) / "omarchy-launch-browser"
+            launcher.write_text("#!/bin/sh\n", encoding="utf-8")
+            launcher.chmod(0o755)
+            with patch.dict("os.environ", {"PATH": directory}, clear=False):
+                with patch.dict("os.environ", {"OMARCHY_CALENDAR_BROWSER_COMMAND": ""}, clear=False):
+                    with patch.object(auth_service, "_spawn_browser", return_value=True) as spawn:
+                        self.assertTrue(auth_service.open_system_browser("https://example.test"))
+        spawn.assert_called_once_with([str(launcher), "https://example.test"])
+
+    def test_override_command_takes_precedence(self):
+        with patch.dict(
+            "os.environ",
+            {"OMARCHY_CALENDAR_BROWSER_COMMAND": "custom-browser --incognito"},
+            clear=False,
+        ):
+            with patch.object(auth_service, "_spawn_browser", return_value=True) as spawn:
+                self.assertTrue(auth_service.open_system_browser("https://example.test"))
+        spawn.assert_called_once_with(["custom-browser", "--incognito", "https://example.test"])
+
+    def test_falls_back_to_the_standard_library_without_a_launcher(self):
+        with patch.dict("os.environ", {}, clear=True):
+            with patch.object(auth_service.shutil, "which", return_value=None):
+                with patch.object(auth_service.webbrowser, "open", return_value=True) as opened:
+                    self.assertTrue(auth_service.open_system_browser("https://example.test"))
+        opened.assert_called_once_with("https://example.test")
 
 
 if __name__ == "__main__":

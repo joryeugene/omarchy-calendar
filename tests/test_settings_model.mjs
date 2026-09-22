@@ -109,6 +109,7 @@ test("account actions are account-specific and preserve separate enable and disc
   assert.deepEqual(rows.map(row => [row.provider, row.account_id, row.account_label, row.editing]), [
     ["google", "one", "one@example.com", false],
     ["google", "two", "two@example.com", false],
+    ["google", "", "Add another Google account", false],
     ["microsoft", "", "Outlook", false],
   ])
   assert.deepEqual(actions.map(action => [action.provider, action.account_id, action.kind]), [
@@ -116,8 +117,19 @@ test("account actions are account-specific and preserve separate enable and disc
     ["google", "one", "disconnect"],
     ["google", "two", "enable"],
     ["google", "two", "disconnect"],
+    ["google", "", "add"],
     ["microsoft", "", "connect"],
   ])
+})
+
+test("connected providers keep an add-account action for more calendars", () => {
+  const rows = settings.accountRows(
+    [{ provider: "google", label: "Google", connected: true, editing_account_ids: [] }],
+    [{ provider: "google", account_id: "one", account_label: "one@example.com" }],
+    [{ provider: "google", account_id: "one", connected: true, stale: false }],
+  )
+
+  assert.deepEqual(settings.accountActions(rows).map(action => action.kind), ["enable", "disconnect", "add"])
 })
 
 test("editing accounts expose status and disconnect without another enable action", () => {
@@ -128,5 +140,5 @@ test("editing accounts expose status and disconnect without another enable actio
   )
 
   assert.equal(rows[0].editing, true)
-  assert.deepEqual(settings.accountActions(rows).map(action => action.kind), ["disconnect"])
+  assert.deepEqual(settings.accountActions(rows).map(action => action.kind), ["disconnect", "add"])
 })

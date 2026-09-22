@@ -103,6 +103,23 @@ function accountRows(providers, calendars, health) {
         editing: (provider.editing_account_ids || []).indexOf(accountId) >= 0,
       })
     }
+    // Providers can hold several accounts at once. Once one is connected the
+    // placeholder row disappears, so add an explicit row that opens the same
+    // browser consent flow again to attach another account.
+    if (accounts.length > 0 && accounts[0] !== "") {
+      rows.push({
+        provider: provider.provider,
+        provider_label: provider.label || provider.provider,
+        account_id: "",
+        account_label: "Add another " + String(provider.label || provider.provider) + " account",
+        connected: false,
+        stale: false,
+        last_sync: "",
+        last_error: "",
+        editing: false,
+        add: true,
+      })
+    }
   }
   return rows
 }
@@ -111,7 +128,8 @@ function accountActions(rows) {
   var actions = []
   for (var i = 0; i < (rows || []).length; i++) {
     var row = rows[i]
-    if (!row.connected) actions.push({ provider: row.provider, account_id: row.account_id, kind: "connect", row: i })
+    if (row.add) actions.push({ provider: row.provider, account_id: "", kind: "add", row: i })
+    else if (!row.connected) actions.push({ provider: row.provider, account_id: row.account_id, kind: "connect", row: i })
     else {
       if (!row.editing) actions.push({ provider: row.provider, account_id: row.account_id, kind: "enable", row: i })
       actions.push({ provider: row.provider, account_id: row.account_id, kind: "disconnect", row: i })

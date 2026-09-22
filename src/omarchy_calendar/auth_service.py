@@ -3,6 +3,10 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from typing import Any, Callable
+import os
+import shlex
+import shutil
+import subprocess
 import webbrowser
 
 from .cache import CalendarStore
@@ -24,6 +28,40 @@ from .settings import ProviderSettings
 from .sync import TOKEN_ENDPOINTS
 
 
+def _spawn_browser(argv: list[str]) -> bool:
+    try:
+        subprocess.Popen(
+            argv,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except OSError:
+        return False
+    return True
+
+
+def open_system_browser(url: str) -> bool:
+    """Open the authorization URL in the user's browser.
+
+    Omarchy's launcher raises and focuses the existing browser window, which
+    plain ``xdg-open`` and ``webbrowser`` do not. Prefer it, then ``xdg-open``,
+    then the standard library, so a browser always comes to the front for the
+    consent step. ``OMARCHY_CALENDAR_BROWSER_COMMAND`` overrides the chain.
+    """
+    override = os.environ.get("OMARCHY_CALENDAR_BROWSER_COMMAND", "").strip()
+    if override:
+        return _spawn_browser(shlex.split(override) + [url])
+    launcher = shutil.which("omarchy-launch-browser")
+    if launcher:
+        return _spawn_browser([launcher, url])
+    xdg_open = shutil.which("xdg-open")
+    if xdg_open:
+        return _spawn_browser([xdg_open, url])
+    return webbrowser.open(url)
+
+
 class Authenticator:
     def __init__(
         self,
@@ -33,7 +71,7 @@ class Authenticator:
         http: Any | None = None,
         settings: ProviderSettings | None = None,
         providers: dict[str, Any] | None = None,
-        browser: Callable[[str], bool] = webbrowser.open,
+        browser: Callable[[str], bool] = open_system_browser,
         receiver_factory: Callable[[OAuthFlow], Any] = LoopbackReceiver,
         flow_factory: Callable[[], OAuthFlow] = OAuthFlow.create,
         now: Callable[[], datetime] | None = None,

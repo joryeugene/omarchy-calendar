@@ -51,7 +51,7 @@ TestCase {
     function test_read_only_accounts_have_separate_enable_and_disconnect_actions() {
         verify(typeof settings.focusAccountAction === "function");
         compare(settings.sections[0], "Accounts and Calendars");
-        compare(settings.accountActionCount(), 5);
+        compare(settings.accountActionCount(), 6);
         settings.activateCurrent();
         compare(activated[0], ["enable", "google", "one"]);
         settings.moveControl(1);
@@ -60,6 +60,14 @@ TestCase {
         settings.moveControl(1);
         settings.activateCurrent();
         compare(activated[2], ["enable", "google", "two"]);
+    }
+
+    function test_connected_provider_offers_add_account() {
+        var index = settings.accountActionIndex("google", "", "add");
+        verify(index >= 0);
+        settings.controlIndex = index;
+        settings.activateCurrent();
+        compare(activated[0], ["connect", "google", ""]);
     }
 
     function test_focus_targets_the_exact_account_action_and_footer_is_navigable() {

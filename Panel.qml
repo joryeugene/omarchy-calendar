@@ -112,6 +112,18 @@ Panel {
     readonly property string contentFontFamily: bar ? bar.fontFamily : Style.font.family
     readonly property var events: CalendarModel.visibleCalendarEvents(cachedEvents, previewSettings.hiddenCalendars)
     readonly property bool filteredEmpty: cachedEvents.length > 0 && events.length === 0
+    readonly property bool hasConnectedAccount: {
+        for (var i = 0; i < setupProviders.length; i++)
+            if (setupProviders[i] && setupProviders[i].connected)
+                return true;
+        return false;
+    }
+    // The empty-state card is only for states the user can act on: a helper
+    // error, every calendar hidden, or no account connected yet. A connected
+    // account with no events in the period shows nothing, matching Week.
+    readonly property bool showEmptyState: !root.loading && root.events.length === 0
+        && !root.showSettings && !root.showSetup && !root.showEditor
+        && (!root.hasConnectedAccount || root.errorText !== "" || root.filteredEmpty)
     readonly property var dayEvents: CalendarModel.eventsForDay(events, cursorDate)
     readonly property var weekEvents: CalendarModel.eventsForWeek(events, cursorDate)
     readonly property var visibleEvents: activeTab === "today" ? dayEvents : weekEvents
@@ -147,7 +159,9 @@ Panel {
             if (!root.opened)
                 return;
             root.setCenterHoverRevealSuppressed(true);
-            root.loadView();
+            // The panel stays loaded between summons and can outlive a day
+            // boundary, so always open on today rather than a stale cursor.
+            root.goCurrent();
             root.loadSetupStatus();
         });
     }
@@ -166,7 +180,11 @@ Panel {
     function refresh() { root.loadView(); }
     function closeForPopoutSwitch() { root.close(); }
     function setCenterHoverRevealSuppressed(value) {
-        if (root.bar && "centerHoverRevealSuppressed" in root.bar)
+        if (!root.bar)
+            return;
+        if (typeof root.bar.setCenterHoverRevealSuppressed === "function")
+            root.bar.setCenterHoverRevealSuppressed(value);
+        else if ("centerHoverRevealSuppressed" in root.bar)
             root.bar.centerHoverRevealSuppressed = value;
     }
     function switchPanel(direction) {
@@ -323,6 +341,10 @@ Panel {
         pendingAnchorEvent = null;
         pendingNow = true;
         loadView();
+    }
+    function goToday() {
+        activeTab = "today";
+        goCurrent();
     }
     function selectUid(uid, day) {
         selectedUid = String(uid || "");
@@ -1090,7 +1112,7 @@ Panel {
                     return;
                 }
                 if (text === "t")
-                    root.setTab("today");
+                    root.goToday();
                 else if (text === "w")
                     root.setTab("week");
                 else if (text === "j")
@@ -1154,20 +1176,33 @@ Panel {
                                 model: [
                                     {
                                         key: "today",
-                                        label: "t  Today"
+                                        label: "t  Today",
+                                        kind: "tab"
                                     },
                                     {
                                         key: "week",
-                                        label: "w  Week"
+                                        label: "w  Week",
+                                        kind: "tab"
+                                    },
+                                    {
+                                        key: "new",
+                                        label: "n  New",
+                                        kind: "new"
+                                    },
+                                    {
+                                        key: "settings",
+                                        label: "s  Settings",
+                                        kind: "settings"
                                     }
                                 ]
                                 Rectangle {
                                     required property var modelData
-                                    width: Style.space(108)
+                                    readonly property bool active: modelData.kind === "tab" ? root.activeTab === modelData.key : modelData.kind === "new" ? root.showEditor && root.editorMode === "create" : root.showSettings
+                                    width: Style.space(modelData.kind === "settings" ? 128 : 108)
                                     height: Style.space(34)
                                     radius: Style.space(6)
-                                    color: root.activeTab === modelData.key ? root.palette.accent : "transparent"
-                                    border.color: root.activeTab === modelData.key ? root.palette.accent : root.palette.border
+                                    color: active ? root.palette.accent : "transparent"
+                                    border.color: active ? root.palette.accent : root.palette.border
                                     border.width: 1
                                     Behavior on color {
                                         enabled: root.motionDuration > 0
@@ -1179,77 +1214,22 @@ Panel {
                                         textFormat: Text.PlainText
                                         anchors.centerIn: parent
                                         text: modelData.label
-                                        color: root.activeTab === modelData.key ? root.palette.background : root.palette.foreground
+                                        color: active ? root.palette.background : root.palette.foreground
                                         font.family: root.contentFontFamily
                                         font.pixelSize: Style.font.caption * root.textScale
                                         font.bold: true
                                     }
                                     MouseArea {
                                         anchors.fill: parent
-                                        onClicked: root.setTab(modelData.key)
+                                        onClicked: {
+                                            if (modelData.kind === "tab")
+                                                modelData.key === "today" ? root.goToday() : root.setTab(modelData.key);
+                                            else if (modelData.kind === "new")
+                                                root.beginCreate(root.selectedDay, 9 * 60);
+                                            else
+                                                root.openSettings(1);
+                                        }
                                     }
-                                }
-                            }
-                        }
-                        Row {
-                            anchors.right: parent.right
-                            anchors.rightMargin: Style.space(16)
-                            anchors.verticalCenter: parent.verticalCenter
-                            spacing: Style.space(10)
-                            Text {
-                                textFormat: Text.PlainText
-                                text: root.updateStatus
-                                color: root.demoData ? "#e0af68" : root.syncing ? root.palette.accent : root.updateNeedsAttention ? root.palette.urgent : root.palette.muted
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption * root.textScale
-                            }
-                            Text {
-                                textFormat: Text.PlainText
-                                text: "New  n"
-                                color: root.showEditor && root.editorMode === "create" ? root.palette.accent : root.palette.foreground
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption * root.textScale
-                                font.bold: true
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.beginCreate(root.selectedDay, 9 * 60)
-                                }
-                            }
-                            Text {
-                                textFormat: Text.PlainText
-                                text: "Refresh  r"
-                                color: root.syncing ? root.palette.muted : root.palette.foreground
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption * root.textScale
-                                font.bold: true
-                                MouseArea {
-                                    anchors.fill: parent
-                                    enabled: !root.syncing
-                                    onClicked: root.refreshProviders()
-                                }
-                            }
-                            Text {
-                                textFormat: Text.PlainText
-                                text: "Settings  s"
-                                color: root.showSettings ? root.palette.accent : root.palette.foreground
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption * root.textScale
-                                font.bold: true
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.openSettings(1)
-                                }
-                            }
-                            Text {
-                                textFormat: Text.PlainText
-                                text: "Help  ?"
-                                color: root.showHelp ? root.palette.accent : root.palette.foreground
-                                font.family: root.contentFontFamily
-                                font.pixelSize: Style.font.caption * root.textScale
-                                font.bold: true
-                                MouseArea {
-                                    anchors.fill: parent
-                                    onClicked: root.showHelp = !root.showHelp
                                 }
                             }
                         }
@@ -1397,7 +1377,7 @@ Panel {
                             onEnableEditingRequested: root.enableCopiedOriginalEditing()
                         }
                         Rectangle {
-                            visible: !root.loading && root.events.length === 0 && !root.showSettings && !root.showSetup && !root.showEditor
+                            visible: root.showEmptyState
                             anchors.centerIn: parent
                             width: Style.space(560)
                             height: Style.space(240)
@@ -1405,6 +1385,32 @@ Panel {
                             color: root.palette.surface
                             border.color: root.errorText !== "" ? root.palette.urgent : root.palette.border
                             border.width: 1
+                            Rectangle {
+                                objectName: "emptyStateClose"
+                                width: Style.space(30)
+                                height: Style.space(30)
+                                radius: Style.space(6)
+                                anchors.top: parent.top
+                                anchors.right: parent.right
+                                anchors.topMargin: Style.space(12)
+                                anchors.rightMargin: Style.space(12)
+                                color: "transparent"
+                                border.color: root.palette.border
+                                border.width: 1
+                                Text {
+                                    textFormat: Text.PlainText
+                                    anchors.centerIn: parent
+                                    text: "X"
+                                    color: root.palette.muted
+                                    font.family: root.contentFontFamily
+                                    font.pixelSize: Style.font.caption * root.textScale
+                                    font.bold: true
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: root.close()
+                                }
+                            }
                             Column {
                                 anchors.fill: parent
                                 anchors.margins: Style.space(22)
@@ -1455,7 +1461,7 @@ Panel {
                                     Text {
                                         textFormat: Text.PlainText
                                         anchors.centerIn: parent
-                                        text: root.errorText !== "" ? "c  Calendar settings" : "Load fictional demo data"
+                                        text: root.errorText !== "" || root.filteredEmpty ? "c  Calendar settings" : "Load fictional demo data"
                                         color: root.palette.foreground
                                         font.family: root.contentFontFamily
                                         font.pixelSize: Style.font.caption * root.textScale
@@ -1463,7 +1469,7 @@ Panel {
                                     }
                                     MouseArea {
                                         anchors.fill: parent
-                                        onClicked: root.errorText !== "" ? root.openSettings(0) : root.seedDemo()
+                                        onClicked: root.errorText !== "" || root.filteredEmpty ? root.openSettings(0) : root.seedDemo()
                                     }
                                 }
                             }
